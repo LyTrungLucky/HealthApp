@@ -26,14 +26,14 @@ SECRET_KEY = 'django-insecure-fjp207y4pt7qhu$l(wd#q0#lcex&(pyi_-f!l1)n1$yqyl(at7
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 import cloudinary.api
 
 cloudinary.config(
-    cloud_name="dxxwcby8l",
-    api_key="792844686918347",
-    api_secret="T8ys_Z9zaKSqmKWa4K1RY6DXUJg"
+    cloud_name="dn9gavfcw",
+    api_key="993796645592197",
+    api_secret="78QiMy8z5_eipwAsYrlozT-rHMg"
 )
 
 # Application definition
@@ -56,7 +56,8 @@ INSTALLED_APPS = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
-    )
+
+    ),
 }
 
 MIDDLEWARE = [
@@ -150,5 +151,5 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CLIENI_ID = 'lqtezFjp9KsQuNvHeRWgWR5S4pHg9Hnu17izXpx3'
-CLIENT_SECRET = '8JHcox4rDCUcdP5miRXyTUYUmUiz1R57TaYcgGscqonxA045NbAhuQt5L7CS7ZGFagQn0lk8p6ikZj5IRQ2e3GSojR9MyuczhDLSuo6nuj4xv4UE2pwSc6ycgBZR2D9v'
+CLIENI_ID = 'fc30znbzCssQY4K9NICCdo0DeM7zB9IG7r9QL8ka'
+CLIENT_SECRET = 'MHlRBF2bZfsK3tadBkwcsLtnCBXO5TZgbhlHOFtKwWjxMluhH17xW531X7PEDaBjHyKShs6lIV3xo2C2PKLruWDQiRXpFzrIADO6aUSjuOlGJIa56GMkHmuCuMsAhQKD'

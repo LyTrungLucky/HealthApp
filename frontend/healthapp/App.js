@@ -1,0 +1,155 @@
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { NavigationContainer } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { Icon } from "react-native-paper";
+import { MyUserContext } from "./utils/contexts/MyContext";
+import { useContext, useReducer } from "react";
+import MyUserReducer from "./utils/reducers/MyUserReducer";
+import { Provider as PaperProvider } from "react-native-paper";
+
+// Auth Screens
+import Welcome from "./screens/Auth/Welcome";
+import Register from "./screens/Auth/Register";
+import Login from "./screens/Auth/Login";
+
+// Home Screens
+import Home from "./screens/Home/Home";
+
+// Exercise Screens
+import ExerciseList from "./screens/Exercise/ExerciseList";
+import ExerciseDetail from "./screens/Exercise/ExerciseDetail";
+import WorkoutPlan from "./screens/Exercise/WorkoutPlan";
+import CreateWorkoutPlan from "./screens/Exercise/CreateWorkoutPlan";
+
+// Nutrition Screens
+import FoodList from "./screens/Nutrition/FoodList";
+import FoodDetail from "./screens/Nutrition/FoodDetail";
+import NutritionPlan from "./screens/Nutrition/NutritionPlan";
+import CreateNutritionPlan from "./screens/Nutrition/CreateNutritionPlan";
+
+// Profile Screens
+import Profile from "./screens/Profile/Profile";
+import HealthProfile from "./screens/Profile/HealthProfile";
+import DailyTracking from "./screens/Profile/DailyTracking";
+import Progress from "./screens/Profile/Progress";
+
+// Expert Screens
+import ExpertList from "./screens/Expert/ExpertList";
+
+const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+
+/* ================= HOME STACK ================= */
+const HomeStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="HomeMain" component={Home} />
+    <Stack.Screen name="ExerciseList" component={ExerciseList} />
+    <Stack.Screen name="ExerciseDetail" component={ExerciseDetail} />
+    <Stack.Screen name="FoodList" component={FoodList} />
+    <Stack.Screen name="FoodDetail" component={FoodDetail} />
+  </Stack.Navigator>
+);
+
+/* ================= PLANS STACK ================= */
+const PlansStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="WorkoutPlan" component={WorkoutPlan} />
+    <Stack.Screen name="CreateWorkoutPlan" component={CreateWorkoutPlan} />
+    <Stack.Screen name="NutritionPlan" component={NutritionPlan} />
+    <Stack.Screen name="CreateNutritionPlan" component={CreateNutritionPlan} />
+  </Stack.Navigator>
+);
+
+/* ================= PROFILE STACK ================= */
+const ProfileStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="ProfileMain" component={Profile} />
+    <Stack.Screen name="HealthProfile" component={HealthProfile} />
+    <Stack.Screen name="DailyTracking" component={DailyTracking} />
+    <Stack.Screen name="Progress" component={Progress} />
+  </Stack.Navigator>
+);
+
+/* ================= MAIN TAB (SAU KHI LOGIN) ================= */
+const MainTabNavigator = () => {
+  return (
+    <Tab.Navigator screenOptions={{ headerShown: false }}>
+      <Tab.Screen
+        name="Home"
+        component={HomeStack}
+        options={{
+          title: "Trang chủ",
+          tabBarIcon: ({ color }) => (
+            <Icon source="home" color={color} size={24} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Plans"
+        component={PlansStack}
+        options={{
+          title: "Kế hoạch",
+          tabBarIcon: ({ color }) => (
+            <Icon source="calendar-check" color={color} size={24} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Expert"
+        component={ExpertList}
+        options={{
+          title: "Chuyên gia",
+          tabBarIcon: ({ color }) => (
+            <Icon source="doctor" color={color} size={24} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileStack}
+        options={{
+          title: "Hồ sơ",
+          tabBarIcon: ({ color }) => (
+            <Icon source="account" color={color} size={24} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
+};
+
+/* ================= ROOT NAV ================= */
+const RootNavigator = () => {
+  const [user] = useContext(MyUserContext);
+
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {user === null ? (
+        <>
+          <Stack.Screen name="Welcome" component={Welcome} />
+          <Stack.Screen name="Login" component={Login} />
+          <Stack.Screen name="Register" component={Register} />
+        </>
+      ) : (
+        <Stack.Screen name="MainApp" component={MainTabNavigator} />
+      )}
+    </Stack.Navigator>
+  );
+};
+
+/* ================= APP ================= */
+const App = () => {
+  const [user, dispatch] = useReducer(MyUserReducer, null);
+
+  return (
+    <PaperProvider>
+      <MyUserContext.Provider value={[user, dispatch]}>
+        <NavigationContainer>
+          <RootNavigator />
+        </NavigationContainer>
+      </MyUserContext.Provider>
+    </PaperProvider>
+  );
+};
+
+export default App;
