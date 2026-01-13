@@ -28,9 +28,9 @@ const WorkoutPlan = () => {
     };
 
     useEffect(() => {
-        const unsubscribe = nav.addListener('focus', () => {
-            loadPlans();
-        });
+        // Load plans on mount and when the screen regains focus
+        loadPlans();
+        const unsubscribe = nav.addListener('focus', loadPlans);
         return unsubscribe;
     }, [nav]);
 
@@ -63,7 +63,7 @@ const WorkoutPlan = () => {
     };
 
     const renderPlan = ({ item }) => (
-        <TouchableOpacity onPress={() => console.log('View plan:', item.id)}>
+        <TouchableOpacity onPress={() => nav.navigate('WorkoutPlanDetail', { id: item.id })}>
             <Card style={styles.planCard}>
                 <Card.Content>
                     <View style={styles.planHeader}>
@@ -141,7 +141,7 @@ const WorkoutPlan = () => {
             <FAB
                 style={styles.fab}
                 icon="plus"
-                onPress={() => nav.navigate('CreateWorkoutPlan')}
+                onPress={() => nav.navigate('Plans', { screen: 'CreateWorkoutPlan' })}
             />
         </View>
     );

@@ -10,12 +10,12 @@ const CreateNutritionPlan = () => {
     const [healthProfile, setHealthProfile] = useState(null);
     const [templates, setTemplates] = useState([]);
     const [recommendedFoods, setRecommendedFoods] = useState([]);
-    const [selectedFoods, setSelectedFoods] = useState([]);
+    const [selectedFoods, setSelectedFoods] = useState([]); // items include weekday and portion when selected
     const [selectedTemplate, setSelectedTemplate] = useState(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [mode, setMode] = useState('template');
-    
+
     const [formData, setFormData] = useState({
         name: '',
         goal: 'maintain',
@@ -48,7 +48,7 @@ const CreateNutritionPlan = () => {
             if (token) {
                 const profileRes = await authApis(token).get(endpoints['my_profile']);
                 setHealthProfile(profileRes.data);
-                
+
                 const goalCalories = goalOptions.find(g => g.value === profileRes.data.goal)?.calories || 1900;
                 setFormData({
                     ...formData,
@@ -60,7 +60,12 @@ const CreateNutritionPlan = () => {
                 setRecommendedFoods(foodsRes.data);
             }
         } catch (error) {
-            console.error(error);
+            // Silently handle missing profile (404) so console doesn't show raw Axios error
+            if (error?.response?.status === 404) {
+                // no profile yet — UI will prompt the user to create one
+            } else {
+                console.error('Error loading nutrition data:', error);
+            }
         } finally {
             setLoading(false);
         }
@@ -101,10 +106,12 @@ const CreateNutritionPlan = () => {
 
             // If there are more than 5 templates, add a Browse option
             if (templates.length > 5) {
-                buttons.push({ text: 'Xem tất cả', onPress: () => {
-                    // fallback: just select first template for now
-                    handleSelectTemplate(templates[0]);
-                }});
+                buttons.push({
+                    text: 'Xem tất cả', onPress: () => {
+                        // fallback: just select first template for now
+                        handleSelectTemplate(templates[0]);
+                    }
+                });
             }
 
             buttons.push({ text: 'Hủy', style: 'cancel' });
@@ -118,6 +125,7 @@ const CreateNutritionPlan = () => {
 
     const handleSelectTemplate = async (template) => {
         setSelectedTemplate(template);
+
         setFormData({
             ...formData,
             name: template.name,
@@ -127,21 +135,32 @@ const CreateNutritionPlan = () => {
 
         try {
             const token = await AsyncStorage.getItem('token');
-            if (token) {
-                const mealsRes = await authApis(token).get(endpoints['meal_schedules'](template.id));
-                const foodIds = mealsRes.data.map(m => m.food.id);
-                const selected = recommendedFoods.filter(f => foodIds.includes(f.id));
-                setSelectedFoods(selected);
-                
-                Alert.alert(
-                    "Kế hoạch mẫu",
-                    `Đã chọn: ${template.name}\n${selected.length} món ăn đã được thêm tự động.`
-                );
-            }
+            if (!token) return;
+
+            // 👉 CALL API MỚI
+            const res = await authApis(token).get(
+                endpoints.meal_schedules(template.id)
+            );
+
+            const map = {};
+            res.data.forEach(m => { map[m.food.id] = { weekday: m.weekday, portion: m.portion }; });
+
+            const selected = recommendedFoods
+                .filter(f => Object.keys(map).includes(String(f.id)))
+                .map(f => ({ ...f, weekday: map[f.id].weekday ?? 0, portion: map[f.id].portion ?? 1.0 }));
+
+            setSelectedFoods(selected);
+
+            Alert.alert(
+                "Kế hoạch mẫu",
+                `Đã áp dụng thực đơn "${template.name}" (${selected.length} món ăn)`
+            );
         } catch (error) {
-            console.error('Error loading template meals:', error);
+            console.error(error);
+            Alert.alert("Lỗi", "Không thể tải bữa ăn của thực đơn mẫu");
         }
     };
+
 
     const handleCloneTemplate = async (templateId) => {
         setSaving(true);
@@ -149,7 +168,7 @@ const CreateNutritionPlan = () => {
             const token = await AsyncStorage.getItem('token');
             if (token) {
                 await authApis(token).post(endpoints['clone_nutrition_plan'](templateId));
-                
+
                 Alert.alert(
                     "Thành công!",
                     "Đã sao chép kế hoạch mẫu vào danh sách của bạn!",
@@ -169,8 +188,16 @@ const CreateNutritionPlan = () => {
         if (isSelected) {
             setSelectedFoods(selectedFoods.filter(f => f.id !== food.id));
         } else {
-            setSelectedFoods([...selectedFoods, food]);
+            setSelectedFoods([...selectedFoods, { ...food, weekday: 0, portion: 1.0 }]);
         }
+    };
+
+    const setFoodWeekday = (foodId, weekday) => {
+        setSelectedFoods(selectedFoods.map(f => f.id === foodId ? { ...f, weekday } : f));
+    };
+
+    const setFoodPortion = (foodId, portion) => {
+        setSelectedFoods(selectedFoods.map(f => f.id === foodId ? { ...f, portion } : f));
     };
 
     const getTotalCalories = () => {
@@ -178,7 +205,7 @@ const CreateNutritionPlan = () => {
     };
 
     const getMealTypeIcon = (mealType) => {
-        switch(mealType) {
+        switch (mealType) {
             case 'breakfast': return '🌅';
             case 'lunch': return '☀️';
             case 'dinner': return '🌙';
@@ -235,24 +262,19 @@ const CreateNutritionPlan = () => {
                 const planRes = await authApis(token).post(endpoints['nutrition_plans'], planData);
                 const planId = planRes.data.id;
 
-                // Add meals to plan
-                // Distribute meals across the week
-                const groupedFoods = groupFoodsByMealType();
-                const daysOfWeek = [0, 1, 2, 3, 4]; // Mon to Fri
+                // Use selected weekday and portion for each selected food
+                for (let i = 0; i < selectedFoods.length; i++) {
+                    const item = selectedFoods[i];
+                    const mealData = {
+                        food_id: item.id,
+                        weekday: item.weekday ?? 0,
+                        portion: item.portion ?? 1.0,
+                    };
 
-                for (const [mealType, foods] of Object.entries(groupedFoods)) {
-                    for (let i = 0; i < foods.length && i < daysOfWeek.length; i++) {
-                        const mealData = {
-                            food_id: foods[i].id,
-                            weekday: daysOfWeek[i],
-                            portion: 1.0,
-                        };
-
-                        await authApis(token).post(
-                            endpoints['add_meal_to_plan'](planId),
-                            mealData
-                        );
-                    }
+                    await authApis(token).post(
+                        endpoints['add_meal_to_plan'](planId),
+                        mealData
+                    );
                 }
 
                 Alert.alert(
@@ -307,6 +329,8 @@ const CreateNutritionPlan = () => {
                 <View style={styles.placeholder} />
             </View>
 
+            {/* Section toggle removed: this screen only creates nutrition plans */}
+
             <ScrollView style={styles.content}>
                 {/* Mode Selection */}
                 <Card style={styles.card}>
@@ -328,7 +352,7 @@ const CreateNutritionPlan = () => {
                                     Thực đơn mẫu
                                 </Text>
                             </TouchableOpacity>
-                            
+
                             <TouchableOpacity
                                 style={[
                                     styles.modeButton,
@@ -390,11 +414,11 @@ const CreateNutritionPlan = () => {
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.sectionTitle}>Thông tin kế hoạch</Text>
-                        
+
                         <TextInput
                             label="Tên kế hoạch"
                             value={formData.name}
-                            onChangeText={(text) => setFormData({...formData, name: text})}
+                            onChangeText={(text) => setFormData({ ...formData, name: text })}
                             mode="outlined"
                             style={styles.input}
                         />
@@ -402,7 +426,7 @@ const CreateNutritionPlan = () => {
                         <TextInput
                             label="Mô tả"
                             value={formData.description}
-                            onChangeText={(text) => setFormData({...formData, description: text})}
+                            onChangeText={(text) => setFormData({ ...formData, description: text })}
                             mode="outlined"
                             multiline
                             numberOfLines={3}
@@ -413,7 +437,7 @@ const CreateNutritionPlan = () => {
                             <TextInput
                                 label="Calories/ngày"
                                 value={formData.daily_calories}
-                                onChangeText={(text) => setFormData({...formData, daily_calories: text})}
+                                onChangeText={(text) => setFormData({ ...formData, daily_calories: text })}
                                 mode="outlined"
                                 keyboardType="numeric"
                                 style={[styles.input, styles.halfInput]}
@@ -422,7 +446,7 @@ const CreateNutritionPlan = () => {
                             <TextInput
                                 label="Thời gian (tuần)"
                                 value={formData.duration}
-                                onChangeText={(text) => setFormData({...formData, duration: text})}
+                                onChangeText={(text) => setFormData({ ...formData, duration: text })}
                                 mode="outlined"
                                 keyboardType="numeric"
                                 style={[styles.input, styles.halfInput]}
@@ -470,7 +494,8 @@ const CreateNutritionPlan = () => {
 
                         <View style={styles.foodList}>
                             {recommendedFoods.map((food) => {
-                                const isSelected = selectedFoods.find(f => f.id === food.id);
+                                const selectedItem = selectedFoods.find(f => f.id === food.id);
+                                const isSelected = !!selectedItem;
                                 return (
                                     <TouchableOpacity
                                         key={food.id}
@@ -490,6 +515,20 @@ const CreateNutritionPlan = () => {
                                             <Text style={styles.foodNutrition}>
                                                 🔥 {food.calories}cal | 💪 {food.protein}g protein
                                             </Text>
+
+                                            {isSelected && (
+                                                <View style={styles.weekdayRow}>
+                                                    {['Thứ 2','Thứ 3','Thứ 4','Thứ 5','Thứ 6','Thứ 7','Chủ nhật'].map((label, idx) => (
+                                                        <Chip
+                                                            key={label}
+                                                            style={[styles.weekdayChip, selectedItem.weekday === idx && styles.weekdayChipActive]}
+                                                            onPress={() => setFoodWeekday(food.id, idx)}
+                                                        >
+                                                            {label}
+                                                        </Chip>
+                                                    ))}
+                                                </View>
+                                            )}
                                         </View>
                                     </TouchableOpacity>
                                 );
@@ -559,6 +598,36 @@ const styles = StyleSheet.create({
     },
     placeholder: {
         width: 38,
+    },
+    sectionToggle: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        paddingHorizontal: 15,
+        paddingVertical: 10,
+        gap: 10,
+        backgroundColor: '#f5f5f5',
+    },
+    sectionButton: {
+        flex: 1,
+        paddingVertical: 10,
+        marginHorizontal: 5,
+        borderRadius: 8,
+        backgroundColor: '#ffffff',
+        borderWidth: 1,
+        borderColor: '#e0e0e0',
+        alignItems: 'center',
+    },
+    sectionButtonActive: {
+        backgroundColor: '#fff3e0',
+        borderColor: '#ff9800',
+    },
+    sectionText: {
+        fontSize: 14,
+        color: '#666',
+        fontWeight: '600',
+    },
+    sectionTextActive: {
+        color: '#ff9800',
     },
     content: {
         flex: 1,
@@ -665,6 +734,9 @@ const styles = StyleSheet.create({
     foodList: {
         gap: 10,
     },
+    weekdayRow: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 8, gap: 6 },
+    weekdayChip: { backgroundColor: '#e0e0e0', marginRight: 6, marginBottom: 6 },
+    weekdayChipActive: { backgroundColor: '#4caf50', color: '#fff' },
     foodItem: {
         padding: 15,
         borderRadius: 10,

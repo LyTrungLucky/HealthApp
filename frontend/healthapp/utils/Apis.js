@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = 'http://192.168.1.7:8000'; 
+const BASE_URL = 'http://192.168.1.13:8000'; 
 
 export const endpoints = {
     // Auth
@@ -40,6 +40,8 @@ export const endpoints = {
     // Nutrition Plan
     'nutrition_plans': '/nutrition-plans/',
     'nutrition_detail': (id) => `/nutrition-plans/${id}/`,
+    // Some backends expose plan meals under a "schedules" subpath (see workout_schedules pattern).
+    // If your backend uses a different path (e.g. `/meals/`), revert this or update accordingly.
     'meal_schedules': (id) => `/nutrition-plans/${id}/meals/`,
     'add_meal_to_plan': (id) => `/nutrition-plans/${id}/add-meal/`,
     'nutrition_templates': '/nutrition-plans/templates/',

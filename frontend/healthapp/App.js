@@ -3,7 +3,8 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Icon } from "react-native-paper";
 import { MyUserContext } from "./utils/contexts/MyContext";
-import { useContext, useReducer } from "react";
+import { useContext, useReducer, useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import MyUserReducer from "./utils/reducers/MyUserReducer";
 import { Provider as PaperProvider } from "react-native-paper";
 
@@ -20,12 +21,14 @@ import ExerciseList from "./screens/Exercise/ExerciseList";
 import ExerciseDetail from "./screens/Exercise/ExerciseDetail";
 import WorkoutPlan from "./screens/Exercise/WorkoutPlan";
 import CreateWorkoutPlan from "./screens/Exercise/CreateWorkoutPlan";
+import WorkoutPlanDetail from "./screens/Exercise/WorkoutPlanDetail";
 
 // Nutrition Screens
 import FoodList from "./screens/Nutrition/FoodList";
 import FoodDetail from "./screens/Nutrition/FoodDetail";
 import NutritionPlan from "./screens/Nutrition/NutritionPlan";
 import CreateNutritionPlan from "./screens/Nutrition/CreateNutritionPlan";
+import NutritionPlanDetail from "./screens/Nutrition/NutritionPlanDetail";
 
 // Profile Screens
 import Profile from "./screens/Profile/Profile";
@@ -51,12 +54,41 @@ const HomeStack = () => (
 );
 
 /* ================= PLANS STACK ================= */
+// A simple home for Plans tab which lets the user toggle between workout and nutrition
+const PlansHome = ({ navigation }) => {
+  const [active, setActive] = useState('workout');
+
+  return (
+    <View style={{ flex: 1 }}>
+      <View style={localStyles.tabsContainer}>
+        <TouchableOpacity
+          style={[localStyles.tabButton, active === 'workout' && localStyles.activeTab]}
+          onPress={() => setActive('workout')}
+        >
+          <Text style={localStyles.tabText}>Tập luyện</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[localStyles.tabButton, active === 'nutrition' && localStyles.activeTab]}
+          onPress={() => setActive('nutrition')}
+        >
+          <Text style={localStyles.tabText}>Dinh dưỡng</Text>
+        </TouchableOpacity>
+      </View>
+
+      {active === 'workout' ? <WorkoutPlan /> : <NutritionPlan />}
+    </View>
+  );
+};
+
 const PlansStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="PlansHome" component={PlansHome} />
     <Stack.Screen name="WorkoutPlan" component={WorkoutPlan} />
     <Stack.Screen name="CreateWorkoutPlan" component={CreateWorkoutPlan} />
+    <Stack.Screen name="WorkoutPlanDetail" component={WorkoutPlanDetail} />
     <Stack.Screen name="NutritionPlan" component={NutritionPlan} />
     <Stack.Screen name="CreateNutritionPlan" component={CreateNutritionPlan} />
+    <Stack.Screen name="NutritionPlanDetail" component={NutritionPlanDetail} />
   </Stack.Navigator>
 );
 
@@ -151,5 +183,26 @@ const App = () => {
     </PaperProvider>
   );
 };
+
+const localStyles = StyleSheet.create({
+  tabsContainer: {
+    flexDirection: 'row',
+    paddingTop: 50,
+    backgroundColor: '#3b5998',
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  activeTab: {
+    borderBottomWidth: 3,
+    borderBottomColor: '#ffd700',
+  },
+  tabText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+});
 
 export default App;

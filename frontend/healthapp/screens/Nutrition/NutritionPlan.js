@@ -28,9 +28,9 @@ const NutritionPlan = () => {
     };
 
     useEffect(() => {
-        const unsubscribe = nav.addListener('focus', () => {
-            loadPlans();
-        });
+        // Load plans on mount and when the screen regains focus
+        loadPlans();
+        const unsubscribe = nav.addListener('focus', loadPlans);
         return unsubscribe;
     }, [nav]);
 
@@ -63,7 +63,7 @@ const NutritionPlan = () => {
     };
 
     const renderPlan = ({ item }) => (
-        <TouchableOpacity onPress={() => console.log('View plan:', item.id)}>
+        <TouchableOpacity onPress={() => nav.navigate('NutritionPlanDetail', { id: item.id })}>
             <Card style={styles.planCard}>
                 <Card.Content>
                     <View style={styles.planHeader}>
