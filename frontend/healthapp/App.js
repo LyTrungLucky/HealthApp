@@ -36,6 +36,16 @@ import Progress from "./screens/Profile/Progress";
 // Expert Screens
 import ExpertList from "./screens/Expert/ExpertList";
 
+import ReminderList from "./screens/Reminder/ReminderList";
+import CreateReminder from "./screens/Reminder/CreateReminder";
+
+import ClientList from "./screens/Expert/ClientList";
+import ClientProgress from "./screens/Expert/ClientProgress";
+
+import JournalList from "./screens/Journal/JournalList";
+import CreateJournal from "./screens/Journal/CreateJournal";
+import JournalDetail from "./screens/Journal/JournalDetail";
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -67,6 +77,25 @@ const ProfileStack = () => (
     <Stack.Screen name="HealthProfile" component={HealthProfile} />
     <Stack.Screen name="DailyTracking" component={DailyTracking} />
     <Stack.Screen name="Progress" component={Progress} />
+    <Stack.Screen name="ReminderList" component={ReminderList} />
+    <Stack.Screen name="CreateReminder" component={CreateReminder} />
+  </Stack.Navigator>
+);
+
+const ExpertStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="ExpertMain" component={ExpertList} />
+    <Stack.Screen name="ClientList" component={ClientList} />
+    <Stack.Screen name="ClientProgress" component={ClientProgress} />
+  </Stack.Navigator>
+);
+
+// Journal Stack
+const JournalStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="JournalList" component={JournalList} />
+    <Stack.Screen name="CreateJournal" component={CreateJournal} />
+    <Stack.Screen name="JournalDetail" component={JournalDetail} />
   </Stack.Navigator>
 );
 
@@ -96,7 +125,7 @@ const MainTabNavigator = () => {
       />
       <Tab.Screen
         name="Expert"
-        component={ExpertList}
+        component={ExpertStack}
         options={{
           title: "Chuyên gia",
           tabBarIcon: ({ color }) => (
@@ -111,6 +140,16 @@ const MainTabNavigator = () => {
           title: "Hồ sơ",
           tabBarIcon: ({ color }) => (
             <Icon source="account" color={color} size={24} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Journal"
+        component={JournalStack}
+        options={{
+          title: "Nhật ký",
+          tabBarIcon: ({ color }) => (
+            <Icon source="book-open-page-variant" color={color} size={24} />
           ),
         }}
       />

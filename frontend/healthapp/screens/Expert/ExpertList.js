@@ -1,9 +1,11 @@
 // screens/Expert/ExpertList.js
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, RefreshControl } from "react-native";
+import { View, Text, StyleSheet, FlatList, Image, RefreshControl } from "react-native";
 import { Searchbar, Card, Chip, ActivityIndicator, Button } from "react-native-paper";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { authApis, endpoints } from "../../utils/Apis";
+import { MyUserContext } from "../../utils/contexts/MyContext";
 
 const ExpertList = () => {
     const [experts, setExperts] = useState([]);
@@ -11,6 +13,8 @@ const ExpertList = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [user] = useContext(MyUserContext);
+    const nav = useNavigation();
 
     const roles = [
         { value: null, label: 'Tất cả' },
@@ -53,6 +57,9 @@ const ExpertList = () => {
         }
     };
 
+    // Kiểm tra user có phải expert không
+    const isExpert = user?.role && ['nutritionist', 'trainer'].includes(user.role);
+
     const renderExpert = ({ item }) => (
         <Card style={styles.expertCard}>
             <Card.Content>
@@ -92,6 +99,19 @@ const ExpertList = () => {
         <View style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Chuyên Gia</Text>
+                
+                {/* Nút cho Expert xem khách hàng */}
+                {isExpert && (
+                    <Button 
+                        mode="contained" 
+                        onPress={() => nav.navigate('ClientList')}
+                        style={styles.clientsButton}
+                        labelStyle={styles.clientsButtonText}
+                        icon="account-group"
+                    >
+                        Khách hàng của tôi
+                    </Button>
+                )}
             </View>
 
             <View style={styles.searchContainer}>
@@ -158,6 +178,14 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
         color: '#ffffff',
+    },
+    clientsButton: {
+        marginTop: 12,
+        backgroundColor: '#ffffff',
+    },
+    clientsButtonText: {
+        color: '#3b5998',
+        fontWeight: 'bold',
     },
     searchContainer: {
         padding: 15,

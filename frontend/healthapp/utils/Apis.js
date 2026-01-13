@@ -1,6 +1,9 @@
 import axios from "axios";
 
-const BASE_URL = 'http://192.168.1.7:8000'; 
+// Đổi IP này thành IP máy tính của bạn (chạy 'ipconfig' để xem)
+// Nếu dùng Android Emulator: 10.0.2.2
+// Nếu dùng điện thoại thật: IP máy tính (ví dụ: 192.168.1.xxx)
+const BASE_URL = 'http://10.0.2.2:8000';  // <-- SỬa IP ở đây 
 
 export const endpoints = {
     // Auth
@@ -53,6 +56,18 @@ export const endpoints = {
     'experts': '/experts/',
     'consultations': '/consultations/',
     'upcoming_consultations': '/consultations/upcoming/',
+
+    // Reminder
+    'reminders': '/reminders/',
+    'reminder_detail': (id) => `/reminders/${id}/`,
+    'today_reminders': '/reminders/today/',
+    'toggle_reminder': (id) => `/reminders/${id}/toggle/`,
+
+    'my_clients': '/health-profiles/my-clients/',
+    'client_progress': (id) => `/progress/client/${id}/`,
+    'health_journals': '/journals/',
+
+    
 };
 
 export const authApis = (token) => {

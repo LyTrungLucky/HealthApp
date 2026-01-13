@@ -29,7 +29,7 @@ const Profile = () => {
     };
 
     const getRoleLabel = (role) => {
-        switch(role) {
+        switch (role) {
             case 'user': return 'Người dùng';
             case 'nutritionist': return 'Chuyên gia dinh dưỡng';
             case 'trainer': return 'Huấn luyện viên';
@@ -47,8 +47,8 @@ const Profile = () => {
             <ScrollView style={styles.content}>
                 {/* User Info Card */}
                 <View style={styles.userCard}>
-                    <Avatar.Image 
-                        size={80} 
+                    <Avatar.Image
+                        size={80}
                         source={user?.avatar ? { uri: user.avatar } : require('../../assets/icon.png')}
                         style={styles.avatar}
                     />
@@ -62,7 +62,7 @@ const Profile = () => {
                 {/* Health Section */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Sức khỏe</Text>
-                    
+
                     <List.Item
                         title="Hồ sơ sức khỏe"
                         description="Quản lý thông tin sức khỏe của bạn"
@@ -71,9 +71,9 @@ const Profile = () => {
                         onPress={() => nav.navigate('HealthProfile')}
                         style={styles.listItem}
                     />
-                    
+
                     <Divider />
-                    
+
                     <List.Item
                         title="Theo dõi hàng ngày"
                         description="Cập nhật hoạt động hàng ngày"
@@ -82,9 +82,9 @@ const Profile = () => {
                         onPress={() => nav.navigate('DailyTracking')}
                         style={styles.listItem}
                     />
-                    
+
                     <Divider />
-                    
+
                     <List.Item
                         title="Tiến độ"
                         description="Xem biểu đồ tiến độ"
@@ -93,12 +93,35 @@ const Profile = () => {
                         onPress={() => nav.navigate('Progress')}
                         style={styles.listItem}
                     />
+
+                    <Divider />
+
+                    <List.Item
+                        title="Nhắc nhở"
+                        description="Quản lý lịch nhắc nhở"
+                        left={props => <List.Icon {...props} icon="bell-outline" color="#ff5722" />}
+                        right={props => <List.Icon {...props} icon="chevron-right" />}
+                        onPress={() => nav.navigate('ReminderList')}
+                        style={styles.listItem}
+                    />
+
+                    <Divider />
+                    
+                    <List.Item
+                        title="📖 Nhật ký sức khỏe"
+                        description="Ghi lại cảm nhận hàng ngày"
+                        left={props => <List.Icon {...props} icon="book-open-page-variant" color="#9c27b0" />}
+                        right={props => <List.Icon {...props} icon="chevron-right" />}
+                        onPress={() => nav.navigate('Journal', { screen: 'JournalList' })}
+                        style={styles.listItem}
+                    />
+
                 </View>
 
                 {/* Plans Section */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Kế hoạch</Text>
-                    
+
                     <List.Item
                         title="Kế hoạch tập luyện"
                         description="Quản lý lịch tập"
@@ -107,9 +130,9 @@ const Profile = () => {
                         onPress={() => nav.navigate('Plans', { screen: 'WorkoutPlan' })}
                         style={styles.listItem}
                     />
-                    
+
                     <Divider />
-                    
+
                     <List.Item
                         title="Kế hoạch dinh dưỡng"
                         description="Quản lý thực đơn"
@@ -123,24 +146,24 @@ const Profile = () => {
                 {/* Settings Section */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Cài đặt</Text>
-                    
+
                     <List.Item
                         title="Thông tin cá nhân"
                         description="Cập nhật thông tin"
                         left={props => <List.Icon {...props} icon="account-edit" color="#607d8b" />}
                         right={props => <List.Icon {...props} icon="chevron-right" />}
-                        onPress={() => {/* TODO: Navigate to edit profile */}}
+                        onPress={() => {/* TODO: Navigate to edit profile */ }}
                         style={styles.listItem}
                     />
-                    
+
                     <Divider />
-                    
+
                     <List.Item
                         title="Đổi mật khẩu"
                         description="Thay đổi mật khẩu"
                         left={props => <List.Icon {...props} icon="lock-reset" color="#795548" />}
                         right={props => <List.Icon {...props} icon="chevron-right" />}
-                        onPress={() => {/* TODO: Navigate to change password */}}
+                        onPress={() => {/* TODO: Navigate to change password */ }}
                         style={styles.listItem}
                     />
                 </View>
