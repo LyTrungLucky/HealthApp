@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import (User, HealthProfile, DailyTracking, Exercise, ExerciseCategory,
                      WorkoutPlan, WorkoutSchedule, Food, NutritionPlan, MealSchedule,
-                     Progress, Consultation)
+                     Progress, Consultation, Reminder, HealthJournal)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -269,3 +269,23 @@ class RegisterSerializer(serializers.ModelSerializer):
         validated_data.pop('password2')
         user = User.objects.create_user(**validated_data)
         return user
+
+
+class ReminderSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    reminder_type_display = serializers.CharField(source='get_reminder_type_display', read_only=True)
+
+    class Meta:
+        model = Reminder
+        fields = '__all__'
+
+
+class HealthJournalSerializer(serializers.ModelSerializer):
+    mood_display = serializers.CharField(source='get_mood_display', read_only=True)
+
+    class Meta:
+        model = HealthJournal
+        fields = ['id', 'date', 'title', 'content', 'mood', 'mood_display',
+                  'workout_completed', 'workout_notes', 'energy_level',
+                  'sleep_hours', 'image', 'created_date']
+        read_only_fields = ['id', 'created_date']

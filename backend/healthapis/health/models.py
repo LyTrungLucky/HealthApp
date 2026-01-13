@@ -228,3 +228,55 @@ class Consultation(BaseModel):
 
     def __str__(self):
         return f"{self.user.username} - {self.expert.username} ({self.appointment_date})"
+
+
+class Reminder(BaseModel):
+    REMINDER_TYPE_CHOICES = [
+        ('water', 'Uống nước'),
+        ('exercise', 'Tập luyện'),
+        ('rest', 'Nghỉ ngơi'),
+        ('meal', 'Bữa ăn'),
+        ('medicine', 'Uống thuốc'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reminders')
+    title = models.CharField(max_length=255)
+    reminder_type = models.CharField(max_length=20, choices=REMINDER_TYPE_CHOICES)
+    time = models.TimeField(help_text="Giờ nhắc nhở")
+    days_of_week = models.JSONField(default=list, help_text="Các ngày trong tuần [0-6]")
+    is_enabled = models.BooleanField(default=True)
+    message = models.TextField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['time']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.title} ({self.time})"
+
+
+class HealthJournal(BaseModel):
+    MOOD_CHOICES = [
+        ('great', '😄 Tuyệt vời'),
+        ('good', '🙂 Tốt'),
+        ('normal', '😐 Bình thường'),
+        ('tired', '😓 Mệt mỏi'),
+        ('bad', '😢 Không tốt'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='journals')
+    date = models.DateField()
+    title = models.CharField(max_length=255)
+    content = models.TextField()
+    mood = models.CharField(max_length=20, choices=MOOD_CHOICES, default='normal')
+    workout_completed = models.BooleanField(default=False)
+    workout_notes = models.TextField(null=True, blank=True, help_text="Cảm nhận sau buổi tập")
+    energy_level = models.IntegerField(default=5, help_text="Mức năng lượng 1-10")
+    sleep_hours = models.FloatField(null=True, blank=True, help_text="Số giờ ngủ")
+    image = CloudinaryField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-date']
+        unique_together = ('user', 'date')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.date} - {self.title}"

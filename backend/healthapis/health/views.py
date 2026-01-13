@@ -5,9 +5,9 @@ from django.db.models import Q
 from datetime import date, timedelta
 from .models import (User, HealthProfile, DailyTracking, Exercise, ExerciseCategory,
                      WorkoutPlan, WorkoutSchedule, Food, NutritionPlan, MealSchedule,
-                     Progress, Consultation)
+                     Progress, Consultation, Reminder, HealthJournal)
 from . import serializers
-from .serializers import UserRegisterSerializer, UserSerializer, WorkoutPlanSerializer, NutritionPlanSerializer
+from .serializers import UserRegisterSerializer, UserSerializer, WorkoutPlanSerializer, NutritionPlanSerializer, HealthJournalSerializer
 
 
 # Authentication Views
@@ -76,6 +76,27 @@ class HealthProfileViewSet(viewsets.ModelViewSet):
             return Response({"detail": "Chưa có hồ sơ sức khỏe"},
                             status=status.HTTP_404_NOT_FOUND)
 
+    @action(methods=['get'], detail=False, url_path='my-clients')
+    def my_clients(self, request):
+        """Chuyên gia lấy danh sách khách hàng"""
+        user = request.user
+        if user.role not in ['nutritionist', 'trainer']:
+            return Response({"detail": "Không có quyền"}, status=status.HTTP_403_FORBIDDEN)
+
+        clients = HealthProfile.objects.filter(expert=user).select_related('user')
+        data = [{
+            'id': c.user.id,
+            'username': c.user.username,
+            'name': f"{c.user.first_name} {c.user.last_name}".strip() or c.user.username,
+            'avatar': c.user.avatar.url if c.user.avatar else None,
+            'goal': c.get_goal_display(),
+            'weight': c.weight,
+            'height': c.height,
+            'target_weight': c.target_weight,
+            'bmi': c.bmi,
+        } for c in clients]
+
+        return Response(data)
 
 # Daily Tracking Views
 class DailyTrackingViewSet(viewsets.ModelViewSet):
@@ -116,6 +137,36 @@ class DailyTrackingViewSet(viewsets.ModelViewSet):
             date__range=[start_date, end_date]
         )
         return Response(serializers.DailyTrackingSerializer(trackings, many=True).data)
+
+    # method weekly summary
+    @action(methods=['get'], detail=False, url_path='weekly-summary')
+    def weekly_summary(self, request):
+        from datetime import date, timedelta
+        from django.db.models import Avg, Count, Sum
+
+        end_date = date.today()
+        start_date = end_date - timedelta(days=7)
+
+        trackings = DailyTracking.objects.filter(
+            user=request.user,
+            date__range=[start_date, end_date]
+        )
+
+        # Tính toán
+        water_avg = trackings.aggregate(avg=Avg('water_intake'))['avg'] or 0
+        water_avg_liters = round(water_avg / 1000, 1)  # Convert ml to L
+
+        workout_count = trackings.filter(steps__gte=5000).count()
+
+        # Estimate calories from steps (rough calculation)
+        total_steps = trackings.aggregate(sum=Sum('steps'))['sum'] or 0
+        calories_total = int(total_steps * 0.04)  # ~0.04 calories per step
+
+        return Response({
+            'water_avg': water_avg_liters,
+            'workout_count': workout_count,
+            'calories_total': calories_total
+        })
 
 
 # Exercise Views
@@ -493,6 +544,46 @@ class ProgressViewSet(viewsets.ModelViewSet):
 
         return Response(list(progress))
 
+    @action(methods=['get'], detail=False, url_path='client/(?P<client_id>[^/.]+)')
+    def get_client_progress(self, request, client_id=None):
+        """Chuyên gia xem tiến độ của 1 khách hàng"""
+        user = request.user
+        if user.role not in ['nutritionist', 'trainer']:
+            return Response({"detail": "Không có quyền"}, status=status.HTTP_403_FORBIDDEN)
+
+        # Kiểm tra client thuộc expert này
+        try:
+            profile = HealthProfile.objects.get(user_id=client_id, expert=user)
+        except HealthProfile.DoesNotExist:
+            return Response({"detail": "Không tìm thấy"}, status=status.HTTP_404_NOT_FOUND)
+
+        days = int(request.query_params.get('days', 30))
+        end_date = date.today()
+        start_date = end_date - timedelta(days=days)
+
+        # Lấy progress
+        progress = Progress.objects.filter(
+            user_id=client_id, date__range=[start_date, end_date]
+        ).values('date', 'weight', 'body_fat', 'muscle_mass')
+
+        # Lấy daily tracking
+        tracking = DailyTracking.objects.filter(
+            user_id=client_id, date__range=[start_date, end_date]
+        ).values('date', 'weight', 'water_intake', 'steps')
+
+        return Response({
+            'client': {
+                'id': profile.user.id,
+                'name': f"{profile.user.first_name} {profile.user.last_name}".strip(),
+                'goal': profile.get_goal_display(),
+                'current_weight': profile.weight,
+                'target_weight': profile.target_weight,
+                'bmi': profile.bmi,
+            },
+            'progress': list(progress),
+            'tracking': list(tracking),
+        })
+
 
 # Consultation Views
 class ConsultationViewSet(viewsets.ModelViewSet):
@@ -529,3 +620,62 @@ class ConsultationViewSet(viewsets.ModelViewSet):
             status__in=['pending', 'confirmed']
         ).order_by('appointment_date')
         return Response(serializers.ConsultationSerializer(upcoming, many=True).data)
+
+
+class ReminderViewSet(viewsets.ModelViewSet):
+    serializer_class = serializers.ReminderSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Reminder.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    @action(methods=['get'], detail=False, url_path='today')
+    def get_today_reminders(self, request):
+        from datetime import date
+        today_weekday = date.today().weekday()
+        reminders = Reminder.objects.filter(
+            user=request.user,
+            is_enabled=True,
+            days_of_week__contains=today_weekday
+        ).order_by('time')
+        return Response(self.get_serializer(reminders, many=True).data)
+
+    @action(methods=['patch'], detail=True, url_path='toggle')
+    def toggle_reminder(self, request, pk=None):
+        reminder = self.get_object()
+        reminder.is_enabled = not reminder.is_enabled
+        reminder.save()
+        return Response(self.get_serializer(reminder).data)
+
+
+class HealthJournalViewSet(viewsets.ModelViewSet):
+    serializer_class = HealthJournalSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return HealthJournal.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    @action(methods=['get'], detail=False, url_path='today')
+    def get_today(self, request):
+        today = date.today()
+        journal = HealthJournal.objects.filter(user=request.user, date=today).first()
+        if journal:
+            return Response(HealthJournalSerializer(journal).data)
+        return Response({"detail": "Chưa có nhật ký hôm nay"}, status=404)
+
+    @action(methods=['get'], detail=False, url_path='month/(?P<year>\d+)/(?P<month>\d+)')
+    def get_by_month(self, request, year, month):
+        journals = HealthJournal.objects.filter(
+            user=request.user,
+            date__year=year,
+            date__month=month
+        )
+        return Response(HealthJournalSerializer(journals, many=True).data)
+
+

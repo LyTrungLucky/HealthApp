@@ -16,6 +16,8 @@ router.register('foods', views.FoodViewSet, basename='food')
 router.register('nutrition-plans', views.NutritionPlanViewSet, basename='nutrition-plan')
 router.register('progress', views.ProgressViewSet, basename='progress')
 router.register('consultations', views.ConsultationViewSet, basename='consultation')
+router.register('reminders', views.ReminderViewSet, basename='reminder')
+router.register('journals', views.HealthJournalViewSet, basename='journal')
 
 urlpatterns = [
     path('', include(router.urls)),
