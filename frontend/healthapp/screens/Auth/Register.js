@@ -21,7 +21,7 @@ const Register = () => {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
-    /* ================= IMAGE PICKER ================= */
+    
     const pickImage = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
@@ -42,7 +42,7 @@ const Register = () => {
         }
     };
 
-    /* ================= VALIDATE ================= */
+    
     const validate = () => {
         if (!user.username || !user.password) {
             setError("Vui lòng nhập đầy đủ thông tin!");
@@ -58,7 +58,7 @@ const Register = () => {
         return true;
     };
 
-    /* ================= REGISTER ================= */
+    
     const register = async () => {
         if (!validate()) return;
 
@@ -102,7 +102,7 @@ const Register = () => {
         }
     };
 
-    /* ================= UI ================= */
+    
     return (
         <View style={MyStyles.container}>
             <ScrollView contentContainerStyle={MyStyles.padding}>
@@ -152,7 +152,7 @@ const Register = () => {
                     style={MyStyles.margin}
                 />
 
-                {/* Avatar */}
+                
                 <TouchableOpacity
                     style={MyStyles.imagePicker}
                     onPress={pickImage}

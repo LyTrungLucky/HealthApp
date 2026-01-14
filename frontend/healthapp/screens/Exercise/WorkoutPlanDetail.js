@@ -47,7 +47,6 @@ const WorkoutPlanDetail = () => {
     useEffect(() => {
         if (id) loadDetail();
         if (exerciseToAdd) {
-            // open dialog to add this exercise to the current plan
             setSelectedWeekday(0);
             setSetsCount('3');
             setRepsCount('10');

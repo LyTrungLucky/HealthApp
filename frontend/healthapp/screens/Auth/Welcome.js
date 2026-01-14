@@ -1,4 +1,3 @@
-// screens/Auth/Welcome.js
 import { View, Text, Image, StyleSheet, Dimensions } from "react-native";
 import { Button } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
@@ -15,16 +14,16 @@ const Welcome = () => {
             style={styles.container}
         >
             <View style={styles.content}>
-                {/* Logo/Image */}
+                
                 <View style={styles.imageContainer}>
                     <Image 
-                        source={require('../../assets/icon.png')} // fallback logo (icon.png)
+                        source={require('../../assets/icon.png')} 
                         style={styles.logo}
                         resizeMode="contain"
                     />
                 </View>
 
-                {/* Welcome Text */}
+                
                 <View style={styles.textContainer}>
                     <Text style={styles.title}>HEALTH MANAGER</Text>
                     <Text style={styles.subtitle}>
@@ -36,7 +35,7 @@ const Welcome = () => {
                     </Text>
                 </View>
 
-                {/* Features */}
+              
                 <View style={styles.featuresContainer}>
                     <View style={styles.feature}>
                         <Text style={styles.featureIcon}>💪</Text>
@@ -52,7 +51,7 @@ const Welcome = () => {
                     </View>
                 </View>
 
-                {/* Buttons */}
+              
                 <View style={styles.buttonContainer}>
                     <Button 
                         mode="contained" 

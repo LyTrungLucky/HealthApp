@@ -1,4 +1,3 @@
-// screens/Expert/ExpertList.js
 import { View, Text, StyleSheet, FlatList, Image, RefreshControl } from "react-native";
 import { Searchbar, Card, Chip, ActivityIndicator, Button } from "react-native-paper";
 import { useState, useEffect, useContext } from "react";
@@ -74,7 +73,7 @@ const ExpertList = () => {
         }
     };
 
-    // Bắt đầu chat
+    
     const startChat = async (expertId) => {
         try {
             const token = await AsyncStorage.getItem('token');
@@ -86,7 +85,7 @@ const ExpertList = () => {
         }
     };
 
-    // Kiểm tra user có phải expert không
+   
     const isExpert = user?.role && ['nutritionist', 'trainer'].includes(user.role);
 
     const renderExpert = ({ item }) => (
@@ -111,7 +110,7 @@ const ExpertList = () => {
                     </View>
                 </View>
                 
-                {/* Nút Tư vấn và Chat */}
+                
                 <View style={styles.buttonRow}>
                     <Button 
                         mode="contained" 
@@ -138,7 +137,7 @@ const ExpertList = () => {
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Chuyên Gia</Text>
 
-                {/* Nút cho Expert xem khách hàng */}
+                
                 {isExpert && (
                     <Button
                         mode="contained"

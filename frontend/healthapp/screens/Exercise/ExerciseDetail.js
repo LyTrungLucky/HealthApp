@@ -1,4 +1,4 @@
-// screens/Exercise/ExerciseDetail.js
+
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Linking, Alert } from "react-native";
 import { Button, ActivityIndicator, Chip, Portal, Dialog, RadioButton, TextInput } from "react-native-paper";
 import { useState, useEffect } from "react";
@@ -25,7 +25,7 @@ const ExerciseDetail = () => {
     }, []);
 
     useEffect(() => {
-        // load user's workout plans for quick add
+       
         loadPlans();
     }, []);
 
@@ -153,7 +153,7 @@ const ExerciseDetail = () => {
 
     return (
         <View style={styles.container}>
-            {/* Header with Back Button */}
+           
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => nav.goBack()} style={styles.backButton}>
                     <Text style={styles.backIcon}>←</Text>
@@ -163,19 +163,19 @@ const ExerciseDetail = () => {
             </View>
 
             <ScrollView style={styles.content}>
-                {/* Image */}
+               
                 <Image 
                     source={exercise.image ? { uri: exercise.image } : require('../../assets/icon.png')}
                     style={styles.image}
                 />
 
-                {/* Title & Category */}
+               
                 <View style={styles.titleSection}>
                     <Text style={styles.title}>{exercise.name}</Text>
                     <Chip style={styles.categoryChip}>{exercise.category?.name || 'N/A'}</Chip>
                 </View>
 
-                {/* Stats */}
+                
                 <View style={styles.statsContainer}>
                     <View style={styles.statBox}>
                         <Text style={styles.statIcon}>⏱️</Text>
@@ -195,19 +195,18 @@ const ExerciseDetail = () => {
                     </View>
                 </View>
 
-                {/* Description */}
+                
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Mô tả</Text>
                     <Text style={styles.description}>{exercise.description}</Text>
                 </View>
 
-                {/* Instructions */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Hướng dẫn thực hiện</Text>
                     <Text style={styles.instructions}>{exercise.instructions}</Text>
                 </View>
 
-                {/* Video Button */}
+                
                 {exercise.video_url && (
                     <Button 
                         mode="contained" 
@@ -219,7 +218,7 @@ const ExerciseDetail = () => {
                     </Button>
                 )}
 
-                {/* Add to Plan Button */}
+                
                 <Button 
                     mode="outlined" 
                     icon="calendar-plus"

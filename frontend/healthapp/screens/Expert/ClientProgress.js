@@ -32,10 +32,10 @@ const ClientProgress = () => {
   const getWeightChart = () => {
     if (!data?.tracking?.length) return { labels: [''], datasets: [{ data: [0] }] };
 
-    const sorted = [...data.tracking].reverse(); // Cũ → Mới
+    const sorted = [...data.tracking].reverse(); 
 
     if (period === 7) {
-      // TUẦN: Hiển thị từng ngày (7 điểm)
+      
       const recent = sorted.slice(-7);
       return {
         labels: recent.map(d => new Date(d.date).getDate().toString()),
@@ -43,9 +43,8 @@ const ClientProgress = () => {
       };
 
     } else if (period === 30) {
-      // THÁNG: Trung bình mỗi tuần (4 điểm)
       const weeks = [];
-      const dataToUse = sorted.slice(-28); // Lấy 28 ngày gần nhất
+      const dataToUse = sorted.slice(-28); 
 
       for (let i = 0; i < 4; i++) {
         const weekData = dataToUse.slice(i * 7, (i + 1) * 7);
@@ -64,7 +63,6 @@ const ClientProgress = () => {
       };
 
     } else {
-      // NĂM: Trung bình mỗi tháng (tối đa 12 điểm)
       const months = {};
 
       sorted.forEach(d => {
@@ -88,7 +86,7 @@ const ClientProgress = () => {
           sortKey: m.year * 12 + m.month
         }))
         .sort((a, b) => a.sortKey - b.sortKey)
-        .slice(-12); // Lấy 12 tháng gần nhất
+        .slice(-12); 
 
       return {
         labels: monthlyData.map(m => m.label),
@@ -102,8 +100,8 @@ const ClientProgress = () => {
     const weights = data.tracking.map(t => t.weight).filter(Boolean);
     if (weights.length < 2) return null;
 
-    const first = weights[weights.length - 1]; // Cũ nhất
-    const last = weights[0]; // Mới nhất
+    const first = weights[weights.length - 1]; 
+    const last = weights[0]; 
     const change = last - first;
     const avgWater = data.tracking.reduce((s, t) => s + (t.water_intake || 0), 0) / data.tracking.length;
     const avgSteps = data.tracking.reduce((s, t) => s + (t.steps || 0), 0) / data.tracking.length;
@@ -132,7 +130,6 @@ const ClientProgress = () => {
       </View>
 
       <ScrollView>
-        {/* Period */}
         <View style={{ flexDirection: 'row', gap: 8, padding: 15 }}>
           {[{ d: 7, l: 'Tuần' }, { d: 30, l: 'Tháng' }, { d: 365, l: 'Năm' }].map(p => (
             <Chip key={p.d} selected={period === p.d} onPress={() => setPeriod(p.d)}
@@ -143,7 +140,7 @@ const ClientProgress = () => {
           ))}
         </View>
 
-        {/* Client Info */}
+        
         <Card style={{ margin: 15, marginTop: 0 }}><Card.Content>
           <Text style={{ fontWeight: 'bold', marginBottom: 10 }}>📋 Thông tin</Text>
           <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
@@ -162,7 +159,7 @@ const ClientProgress = () => {
           </View>
         </Card.Content></Card>
 
-        {/* Weight Chart */}
+        
         <Card style={{ margin: 15, marginTop: 0 }}><Card.Content>
           <Text style={{ fontWeight: 'bold', marginBottom: 10 }}>
             📈 Biến động cân nặng {period === 30 ? '(TB tuần)' : period === 365 ? '(TB tháng)' : ''}
@@ -180,7 +177,7 @@ const ClientProgress = () => {
           />
         </Card.Content></Card>
 
-        {/* Analysis & Recommendations */}
+       
         {analysis && (
           <Card style={{ margin: 15, marginTop: 0 }}><Card.Content>
             <Text style={{ fontWeight: 'bold', marginBottom: 10 }}>💡 Phân tích & Đề xuất</Text>
@@ -208,7 +205,7 @@ const ClientProgress = () => {
           </Card.Content></Card>
         )}
 
-        {/* Quick Actions */}
+        
         <View style={{ padding: 15, gap: 10 }}>
           <Button mode="contained" style={{ backgroundColor: '#4caf50' }}>
             📝 Tạo kế hoạch mới cho {client.name?.split(' ')[0]}

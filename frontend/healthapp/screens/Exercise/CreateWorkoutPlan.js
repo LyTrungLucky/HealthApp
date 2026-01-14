@@ -1,4 +1,4 @@
-// screens/Exercise/CreateWorkoutPlan.js - ĐÃ SỬA ĐỂ DÙNG BACKEND TEMPLATES
+
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { TextInput, Button, RadioButton, Card, Chip, ActivityIndicator } from "react-native-paper";
 import { useState, useEffect } from "react";
@@ -10,7 +10,7 @@ const CreateWorkoutPlan = () => {
     const [healthProfile, setHealthProfile] = useState(null);
     const [templates, setTemplates] = useState([]);
     const [recommendedExercises, setRecommendedExercises] = useState([]);
-    const [selectedExercises, setSelectedExercises] = useState([]); // items will include weekday property when selected
+    const [selectedExercises, setSelectedExercises] = useState([]);
     const [selectedTemplate, setSelectedTemplate] = useState(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -56,9 +56,9 @@ const CreateWorkoutPlan = () => {
                 setRecommendedExercises(exercisesRes.data);
             }
         } catch (error) {
-            // If there's no profile yet the backend may return 404 — handle silently
+            
             if (error?.response?.status === 404) {
-                // no profile -> leave `healthProfile` as null (UI will prompt user)
+                
             } else {
                 console.error('Error loading workout data:', error);
             }
@@ -168,7 +168,7 @@ const CreateWorkoutPlan = () => {
         if (isSelected) {
             setSelectedExercises(selectedExercises.filter(ex => ex.id !== exercise.id));
         } else {
-            // default weekday 0 (Thứ 2)
+            
             setSelectedExercises([...selectedExercises, { ...exercise, weekday: 0 }]);
         }
     };
@@ -207,7 +207,7 @@ const CreateWorkoutPlan = () => {
                 const planRes = await authApis(token).post(endpoints['workout_plans'], planData);
                 const planId = planRes.data.id;
 
-                // Use selected weekday from each selected exercise (default 0 if missing)
+                
                 for (let i = 0; i < selectedExercises.length; i++) {
                     const item = selectedExercises[i];
                     const scheduleData = {
@@ -266,10 +266,10 @@ const CreateWorkoutPlan = () => {
                 <View style={styles.placeholder} />
             </View>
 
-            {/* Section toggle removed: this screen only creates workout plans */}
+            
 
             <ScrollView style={styles.content}>
-                {/* Mode Selection */}
+                
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.sectionTitle}>Chọn cách tạo kế hoạch</Text>
@@ -297,7 +297,7 @@ const CreateWorkoutPlan = () => {
                     </Card.Content>
                 </Card>
 
-                {/* Goal Selection */}
+               
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.sectionTitle}>Mục tiêu</Text>
@@ -325,9 +325,7 @@ const CreateWorkoutPlan = () => {
                     </Card.Content>
                 </Card>
 
-                {/* Templates are selected via the "Sử dụng kế hoạch mẫu" button; show plan editor UI for both modes */}
-
-                {/* Plan Details (show when custom, template mode, or after selecting a template) */}
+                
                 {(mode === 'custom' || mode === 'template' || selectedTemplate) && (
                     <>
                         <Card style={styles.card}>
@@ -363,7 +361,7 @@ const CreateWorkoutPlan = () => {
                             </Card.Content>
                         </Card>
 
-                        {/* Exercise Selection */}
+                       
                         <Card style={styles.card}>
                             <Card.Content>
                                 <View style={styles.exerciseHeader}>

@@ -7,11 +7,11 @@ from .models import (User, HealthProfile, DailyTracking, Exercise, ExerciseCateg
                      WorkoutPlan, WorkoutSchedule, Food, NutritionPlan, MealSchedule,
                      Progress, Consultation, Reminder, HealthJournal, ChatRoom, Message)
 from . import serializers
-from .serializers import UserRegisterSerializer, UserSerializer, WorkoutPlanSerializer, NutritionPlanSerializer, HealthJournalSerializer, MessageSerializer, ChatRoomSerializer, MealScheduleSerializer
+from .serializers import UserRegisterSerializer, UserSerializer, WorkoutPlanSerializer, WorkoutScheduleSerializer, NutritionPlanSerializer, HealthJournalSerializer, MessageSerializer, ChatRoomSerializer, MealScheduleSerializer
 
 
 
-# Authentication Views
+
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserRegisterSerializer
@@ -54,7 +54,7 @@ class ExpertViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 
-# Health Profile Views
+
 class HealthProfileViewSet(viewsets.ModelViewSet):
     queryset = HealthProfile.objects.all()
     serializer_class = serializers.HealthProfileSerializer
@@ -79,7 +79,7 @@ class HealthProfileViewSet(viewsets.ModelViewSet):
 
     @action(methods=['get'], detail=False, url_path='my-clients')
     def my_clients(self, request):
-        """Chuyên gia lấy danh sách khách hàng"""
+
         user = request.user
         if user.role not in ['nutritionist', 'trainer']:
             return Response({"detail": "Không có quyền"}, status=status.HTTP_403_FORBIDDEN)
@@ -99,7 +99,7 @@ class HealthProfileViewSet(viewsets.ModelViewSet):
 
         return Response(data)
 
-# Daily Tracking Views
+
 class DailyTrackingViewSet(viewsets.ModelViewSet):
     queryset = DailyTracking.objects.all()
     serializer_class = serializers.DailyTrackingSerializer
@@ -139,7 +139,7 @@ class DailyTrackingViewSet(viewsets.ModelViewSet):
         )
         return Response(serializers.DailyTrackingSerializer(trackings, many=True).data)
 
-    # method weekly summary
+
     @action(methods=['get'], detail=False, url_path='weekly-summary')
     def weekly_summary(self, request):
         from datetime import date, timedelta
@@ -153,13 +153,11 @@ class DailyTrackingViewSet(viewsets.ModelViewSet):
             date__range=[start_date, end_date]
         )
 
-        # Tính toán
         water_avg = trackings.aggregate(avg=Avg('water_intake'))['avg'] or 0
         water_avg_liters = round(water_avg / 1000, 1)  # Convert ml to L
 
         workout_count = trackings.filter(steps__gte=5000).count()
 
-        # Estimate calories from steps (rough calculation)
         total_steps = trackings.aggregate(sum=Sum('steps'))['sum'] or 0
         calories_total = int(total_steps * 0.04)  # ~0.04 calories per step
 
@@ -170,7 +168,7 @@ class DailyTrackingViewSet(viewsets.ModelViewSet):
         })
 
 
-# Exercise Views
+
 class ExerciseCategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ExerciseCategory.objects.all()
     serializer_class = serializers.ExerciseCategorySerializer
@@ -226,25 +224,14 @@ class ExerciseViewSet(viewsets.ReadOnlyModelViewSet):
                             status=status.HTTP_404_NOT_FOUND)
 
 
-# Workout Plan Views
-from rest_framework import viewsets, permissions, status
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from datetime import date, timedelta
 
-from .models import WorkoutPlan, WorkoutSchedule, Exercise
-from .serializers import WorkoutPlanSerializer, WorkoutScheduleSerializer
+
 
 
 class WorkoutPlanViewSet(viewsets.ModelViewSet):
-    """
-    - User: chỉ thấy & chỉnh sửa workout plan của mình
-    - Trainer: thấy các plan do mình tạo (template)
-    """
     serializer_class = WorkoutPlanSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    # ===================== QUERYSET =====================
     def get_queryset(self):
         user = self.request.user
 
@@ -259,23 +246,15 @@ class WorkoutPlanViewSet(viewsets.ModelViewSet):
             active=True
         )
 
-    # ===================== CREATE =====================
     def perform_create(self, serializer):
-        """
-        User tạo workout plan cho chính mình
-        """
         serializer.save(
             user=self.request.user,
             created_by=self.request.user,
             active=True
         )
 
-    # ===================== TEMPLATE PLANS =====================
     @action(methods=['get'], detail=False, url_path='templates')
     def get_templates(self, request):
-        """
-        Lấy workout plan mẫu do trainer tạo
-        """
         goal = request.query_params.get('goal', 'maintain')
 
         templates = WorkoutPlan.objects.filter(
@@ -287,13 +266,8 @@ class WorkoutPlanViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(templates, many=True)
         return Response(serializer.data)
 
-    # ===================== GET SCHEDULES =====================
     @action(methods=['get'], detail=True, url_path='schedules')
     def get_schedules(self, request, pk=None):
-        """
-        Lấy lịch tập của workout plan
-        (cho phép đọc cả template)
-        """
         try:
             plan = WorkoutPlan.objects.get(
                 id=pk,
@@ -309,12 +283,8 @@ class WorkoutPlanViewSet(viewsets.ModelViewSet):
         serializer = WorkoutScheduleSerializer(schedules, many=True)
         return Response(serializer.data)
 
-    # ===================== CLONE PLAN =====================
     @action(methods=['post'], detail=True, url_path='clone')
     def clone_plan(self, request, pk=None):
-        """
-        Clone workout plan mẫu (trainer) cho user
-        """
         try:
             template = WorkoutPlan.objects.get(
                 id=pk,
@@ -352,13 +322,8 @@ class WorkoutPlanViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(new_plan)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    # ===================== ADD EXERCISE =====================
     @action(methods=['post'], detail=True, url_path='add-exercise')
     def add_exercise(self, request, pk=None):
-        """
-        Thêm bài tập vào workout plan của user
-        (KHÔNG cho sửa template)
-        """
         try:
             plan = WorkoutPlan.objects.get(
                 id=pk,
@@ -405,12 +370,8 @@ class WorkoutPlanViewSet(viewsets.ModelViewSet):
             status=status.HTTP_201_CREATED
         )
 
-    # ===================== REMOVE EXERCISE =====================
     @action(methods=['delete'], detail=True, url_path='remove-exercise')
     def remove_exercise(self, request, pk=None):
-        """
-        Xóa bài tập khỏi workout plan của user
-        """
         schedule_id = request.data.get('schedule_id')
 
         if not schedule_id:
@@ -437,7 +398,6 @@ class WorkoutPlanViewSet(viewsets.ModelViewSet):
         )
 
 
-# Food Views
 class FoodViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Food.objects.filter(active=True)
     serializer_class = serializers.FoodSerializer
@@ -476,42 +436,26 @@ class FoodViewSet(viewsets.ReadOnlyModelViewSet):
                             status=status.HTTP_404_NOT_FOUND)
 
 
-# Nutrition Plan Views
-# health/views.py - NutritionPlanViewSet ĐẦY ĐỦ
-
 class NutritionPlanViewSet(viewsets.ModelViewSet):
     serializer_class = NutritionPlanSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    # ===================== QUERYSET =====================
     def get_queryset(self):
-        """
-        User chỉ thấy nutrition plan của mình
-        Nutritionist thấy các plan do mình tạo
-        """
         user = self.request.user
 
         if user.role == 'nutritionist':
             return NutritionPlan.objects.filter(created_by=user, active=True)
         return NutritionPlan.objects.filter(user=user, active=True)
 
-    # ===================== CREATE =====================
     def perform_create(self, serializer):
-        """
-        Tạo nutrition plan cho user hiện tại
-        """
         serializer.save(
             user=self.request.user,
             created_by=self.request.user,
             active=True
         )
 
-    # ===================== TEMPLATE PLANS =====================
     @action(methods=['get'], detail=False, url_path='templates')
     def get_templates(self, request):
-        """
-        Lấy nutrition plan mẫu (nutritionist tạo)
-        """
         goal = request.query_params.get('goal', 'maintain')
 
         templates = NutritionPlan.objects.filter(
@@ -523,12 +467,8 @@ class NutritionPlanViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(templates, many=True)
         return Response(serializer.data)
 
-    # ===================== CLONE PLAN =====================
     @action(methods=['post'], detail=True, url_path='clone')
     def clone_plan(self, request, pk=None):
-        """
-        Clone nutrition plan mẫu cho user
-        """
         template = self.get_object()
 
         new_plan = NutritionPlan.objects.create(
@@ -543,7 +483,6 @@ class NutritionPlanViewSet(viewsets.ModelViewSet):
             active=True
         )
 
-        # Clone meal schedules
         meals = MealSchedule.objects.filter(nutrition_plan=template)
         for m in meals:
             MealSchedule.objects.create(
@@ -557,12 +496,8 @@ class NutritionPlanViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(new_plan)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    # ===================== GET MEALS =====================
     @action(methods=['get'], detail=True, url_path='meals')
     def get_meals(self, request, pk=None):
-        """
-        Lấy danh sách bữa ăn của nutrition plan (kể cả template)
-        """
         try:
             plan = NutritionPlan.objects.get(
                 id=pk,
@@ -577,12 +512,9 @@ class NutritionPlanViewSet(viewsets.ModelViewSet):
         meals = plan.meal_schedules.all()
         serializer = MealScheduleSerializer(meals, many=True)
         return Response(serializer.data)
-    # ===================== ADD MEAL =====================
+
     @action(methods=['post'], detail=True, url_path='add-meal')
     def add_meal(self, request, pk=None):
-        """
-        Thêm bữa ăn vào nutrition plan
-        """
         plan = self.get_object()
 
         food_id = request.data.get('food_id')
@@ -621,7 +553,7 @@ class NutritionPlanViewSet(viewsets.ModelViewSet):
         )
 
 
-# Progress Views
+
 class ProgressViewSet(viewsets.ModelViewSet):
     queryset = Progress.objects.all()
     serializer_class = serializers.ProgressSerializer
@@ -657,7 +589,6 @@ class ProgressViewSet(viewsets.ModelViewSet):
 
     @action(methods=['get'], detail=False, url_path='client/(?P<client_id>[^/.]+)')
     def get_client_progress(self, request, client_id=None):
-        """Chuyên gia xem tiến độ của 1 khách hàng"""
         user = request.user
         if user.role not in ['nutritionist', 'trainer']:
             return Response({"detail": "Không có quyền"}, status=status.HTTP_403_FORBIDDEN)
@@ -696,7 +627,7 @@ class ProgressViewSet(viewsets.ModelViewSet):
         })
 
 
-# Consultation Views
+
 class ConsultationViewSet(viewsets.ModelViewSet):
     queryset = Consultation.objects.all()
     serializer_class = serializers.ConsultationSerializer
@@ -803,7 +734,6 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
 
     @action(methods=['post'], detail=False, url_path='start/(?P<other_user_id>\d+)')
     def start_chat(self, request, other_user_id):
-        """Bắt đầu hoặc mở chat - hỗ trợ cả user và expert"""
         current_user = request.user
 
         try:
@@ -811,13 +741,10 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
         except User.DoesNotExist:
             return Response({"detail": "Không tìm thấy người dùng"}, status=status.HTTP_404_NOT_FOUND)
 
-        # Xác định ai là user, ai là expert
         if current_user.role in ['nutritionist', 'trainer']:
-            # Current user là expert, other_user là client
             user = other_user
             expert = current_user
         else:
-            # Current user là user thường, other_user phải là expert
             if other_user.role not in ['nutritionist', 'trainer']:
                 return Response({"detail": "Không tìm thấy chuyên gia"}, status=status.HTTP_404_NOT_FOUND)
             user = current_user
@@ -831,18 +758,15 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
 
     @action(methods=['get'], detail=True, url_path='messages')
     def get_messages(self, request, pk=None):
-        """Lấy tin nhắn trong phòng chat"""
         chat_room = self.get_object()
         messages = chat_room.messages.all()
 
-        # Đánh dấu đã đọc tin nhắn của người khác
         messages.filter(is_read=False).exclude(sender=request.user).update(is_read=True)
 
         return Response(MessageSerializer(messages, many=True, context={'request': request}).data)
 
     @action(methods=['post'], detail=True, url_path='send')
     def send_message(self, request, pk=None):
-        """Gửi tin nhắn"""
         chat_room = self.get_object()
         content = request.data.get('content', '').strip()
 
@@ -855,7 +779,6 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
             content=content
         )
 
-        # Cập nhật last_message
         chat_room.last_message = content[:100]
         chat_room.last_message_time = message.created_date
         chat_room.save()

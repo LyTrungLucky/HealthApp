@@ -1,4 +1,3 @@
-// screens/Reminder/ReminderList.js
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl } from "react-native";
 import { FAB, Card, Switch, ActivityIndicator } from "react-native-paper";
 import { useState, useEffect } from "react";

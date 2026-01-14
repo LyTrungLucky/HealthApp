@@ -1,4 +1,4 @@
-// screens/Home/Home.js
+
 import { ScrollView, View, Text, StyleSheet, TouchableOpacity, RefreshControl } from "react-native";
 import { Card, Avatar, Button, ActivityIndicator } from "react-native-paper";
 import { useContext, useEffect, useState } from "react";
@@ -47,7 +47,7 @@ const Home = () => {
         try {
             const token = await AsyncStorage.getItem('token');
             if (token) {
-                // Load health profile
+                
                 try {
                     const profileRes = await authApis(token).get(endpoints['my_profile']);
                     setHealthProfile(profileRes.data);
@@ -55,7 +55,7 @@ const Home = () => {
                     console.log("No health profile yet");
                 }
 
-                // Load today tracking
+            
                 try {
                     const trackingRes = await authApis(token).get(endpoints['today_tracking']);
                     setTodayTracking(trackingRes.data);
@@ -95,7 +95,7 @@ const Home = () => {
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }
         >
-            {/* Header */}
+           
             <View style={styles.header}>
                 <View>
                     <Text style={styles.greeting}>Xin chào,</Text>
@@ -104,13 +104,13 @@ const Home = () => {
                     </Text>
                 </View>
 
-                {/* MENU USER CUSTOM */}
+                
                 <UserMenu />
             </View>
 
 
 
-            {/* Health Summary Card */}
+           
             {healthProfile ? (
                 <Card style={styles.summaryCard}>
                     <Card.Content>
@@ -152,7 +152,7 @@ const Home = () => {
                 </Card>
             )}
 
-            {/* Today Tracking */}
+         
             {todayTracking && (
                 <Card style={styles.trackingCard}>
                     <Card.Content>
@@ -180,7 +180,7 @@ const Home = () => {
                 </Card>
             )}
 
-            {/* Quick Actions */}
+           
             <View style={styles.quickActions}>
                 <Text style={styles.sectionTitle}>Khám phá</Text>
 

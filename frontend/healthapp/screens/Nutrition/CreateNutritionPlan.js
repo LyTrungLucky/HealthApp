@@ -1,4 +1,3 @@
-// screens/Nutrition/CreateNutritionPlan.js
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { TextInput, Button, RadioButton, Card, Chip, ActivityIndicator } from "react-native-paper";
 import { useState, useEffect } from "react";
@@ -10,7 +9,7 @@ const CreateNutritionPlan = () => {
     const [healthProfile, setHealthProfile] = useState(null);
     const [templates, setTemplates] = useState([]);
     const [recommendedFoods, setRecommendedFoods] = useState([]);
-    const [selectedFoods, setSelectedFoods] = useState([]); // items include weekday and portion when selected
+    const [selectedFoods, setSelectedFoods] = useState([]); 
     const [selectedTemplate, setSelectedTemplate] = useState(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -21,7 +20,7 @@ const CreateNutritionPlan = () => {
         goal: 'maintain',
         description: '',
         daily_calories: '',
-        duration: '4', // weeks
+        duration: '4',
     });
 
     const nav = useNavigation();
@@ -60,9 +59,9 @@ const CreateNutritionPlan = () => {
                 setRecommendedFoods(foodsRes.data);
             }
         } catch (error) {
-            // Silently handle missing profile (404) so console doesn't show raw Axios error
+            
             if (error?.response?.status === 404) {
-                // no profile yet — UI will prompt the user to create one
+               
             } else {
                 console.error('Error loading nutrition data:', error);
             }
@@ -86,7 +85,7 @@ const CreateNutritionPlan = () => {
     };
 
     const handleUseTemplate = async () => {
-        // Ensure templates are loaded
+        
         try {
             const token = await AsyncStorage.getItem('token');
             if (token && templates.length === 0) {
@@ -98,17 +97,17 @@ const CreateNutritionPlan = () => {
                 return;
             }
 
-            // Build buttons for Alert from templates
+            
             const buttons = templates.slice(0, 5).map((t) => ({
                 text: t.name,
                 onPress: () => handleSelectTemplate(t)
             }));
 
-            // If there are more than 5 templates, add a Browse option
+            
             if (templates.length > 5) {
                 buttons.push({
                     text: 'Xem tất cả', onPress: () => {
-                        // fallback: just select first template for now
+                       
                         handleSelectTemplate(templates[0]);
                     }
                 });
@@ -137,7 +136,7 @@ const CreateNutritionPlan = () => {
             const token = await AsyncStorage.getItem('token');
             if (!token) return;
 
-            // 👉 CALL API MỚI
+           
             const res = await authApis(token).get(
                 endpoints.meal_schedules(template.id)
             );
@@ -258,11 +257,11 @@ const CreateNutritionPlan = () => {
                     end_date: endDate.toISOString().split('T')[0],
                 };
 
-                // Create nutrition plan
+              
                 const planRes = await authApis(token).post(endpoints['nutrition_plans'], planData);
                 const planId = planRes.data.id;
 
-                // Use selected weekday and portion for each selected food
+              
                 for (let i = 0; i < selectedFoods.length; i++) {
                     const item = selectedFoods[i];
                     const mealData = {
@@ -320,7 +319,7 @@ const CreateNutritionPlan = () => {
 
     return (
         <View style={styles.container}>
-            {/* Header */}
+            
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => nav.goBack()} style={styles.backButton}>
                     <Text style={styles.backIcon}>←</Text>
@@ -329,10 +328,10 @@ const CreateNutritionPlan = () => {
                 <View style={styles.placeholder} />
             </View>
 
-            {/* Section toggle removed: this screen only creates nutrition plans */}
+          
 
             <ScrollView style={styles.content}>
-                {/* Mode Selection */}
+              
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.sectionTitle}>Chọn cách tạo kế hoạch</Text>
@@ -372,7 +371,7 @@ const CreateNutritionPlan = () => {
                     </Card.Content>
                 </Card>
 
-                {/* Goal Selection */}
+               
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.sectionTitle}>Mục tiêu</Text>
@@ -410,7 +409,7 @@ const CreateNutritionPlan = () => {
                     </Card.Content>
                 </Card>
 
-                {/* Plan Details */}
+               
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.sectionTitle}>Thông tin kế hoạch</Text>
@@ -453,7 +452,7 @@ const CreateNutritionPlan = () => {
                             />
                         </View>
 
-                        {/* Calories Summary */}
+                       
                         <View style={styles.caloriesSummary}>
                             <View style={styles.caloriesItem}>
                                 <Text style={styles.caloriesLabel}>Đã chọn:</Text>
@@ -478,7 +477,7 @@ const CreateNutritionPlan = () => {
                     </Card.Content>
                 </Card>
 
-                {/* Food Selection */}
+                
                 <Card style={styles.card}>
                     <Card.Content>
                         <View style={styles.foodHeader}>
@@ -537,7 +536,7 @@ const CreateNutritionPlan = () => {
                     </Card.Content>
                 </Card>
 
-                {/* Save Button */}
+               
                 <Button
                     mode="contained"
                     onPress={handleSave}

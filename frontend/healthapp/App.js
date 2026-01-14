@@ -8,35 +8,34 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import MyUserReducer from "./utils/reducers/MyUserReducer";
 import { Provider as PaperProvider } from "react-native-paper";
 
-// Auth Screens
+
 import Welcome from "./screens/Auth/Welcome";
 import Register from "./screens/Auth/Register";
 import Login from "./screens/Auth/Login";
 
-// Home Screens
+
 import Home from "./screens/Home/Home";
 
-// Exercise Screens
+
 import ExerciseList from "./screens/Exercise/ExerciseList";
 import ExerciseDetail from "./screens/Exercise/ExerciseDetail";
 import WorkoutPlan from "./screens/Exercise/WorkoutPlan";
 import CreateWorkoutPlan from "./screens/Exercise/CreateWorkoutPlan";
 import WorkoutPlanDetail from "./screens/Exercise/WorkoutPlanDetail";
 
-// Nutrition Screens
+
 import FoodList from "./screens/Nutrition/FoodList";
 import FoodDetail from "./screens/Nutrition/FoodDetail";
 import NutritionPlan from "./screens/Nutrition/NutritionPlan";
 import CreateNutritionPlan from "./screens/Nutrition/CreateNutritionPlan";
 import NutritionPlanDetail from "./screens/Nutrition/NutritionPlanDetail";
 
-// Profile Screens
+
 import Profile from "./screens/Profile/Profile";
 import HealthProfile from "./screens/Profile/HealthProfile";
 import DailyTracking from "./screens/Profile/DailyTracking";
 import Progress from "./screens/Profile/Progress";
 
-// Expert Screens
 import ExpertList from "./screens/Expert/ExpertList";
 
 import ReminderList from "./screens/Reminder/ReminderList";
@@ -55,7 +54,6 @@ import ChatScreen from "./screens/Chat/ChatScreen";
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-/* ================= HOME STACK ================= */
 const HomeStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="HomeMain" component={Home} />
@@ -66,8 +64,6 @@ const HomeStack = () => (
   </Stack.Navigator>
 );
 
-/* ================= PLANS STACK ================= */
-// A simple home for Plans tab which lets the user toggle between workout and nutrition
 const PlansHome = ({ navigation }) => {
   const [active, setActive] = useState('workout');
 
@@ -105,7 +101,7 @@ const PlansStack = () => (
   </Stack.Navigator>
 );
 
-/* ================= PROFILE STACK ================= */
+
 const ProfileStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="ProfileMain" component={Profile} />
@@ -128,7 +124,7 @@ const ExpertStack = () => (
   </Stack.Navigator>
 );
 
-// Journal Stack
+
 const JournalStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="JournalList" component={JournalList} />
@@ -137,7 +133,7 @@ const JournalStack = () => (
   </Stack.Navigator>
 );
 
-/* ================= MAIN TAB (SAU KHI LOGIN) ================= */
+
 const MainTabNavigator = () => {
   return (
     <Tab.Navigator screenOptions={{ headerShown: false }}>
@@ -196,7 +192,7 @@ const MainTabNavigator = () => {
   );
 };
 
-/* ================= ROOT NAV ================= */
+
 const RootNavigator = () => {
   const [user] = useContext(MyUserContext);
 
@@ -215,7 +211,7 @@ const RootNavigator = () => {
   );
 };
 
-/* ================= APP ================= */
+
 const App = () => {
   const [user, dispatch] = useReducer(MyUserReducer, null);
 

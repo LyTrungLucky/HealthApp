@@ -1,4 +1,3 @@
-// screens/Statistics/WeeklyStats.js
 import { View, Text, StyleSheet, ScrollView, Dimensions } from "react-native";
 import { Card, ActivityIndicator, SegmentedButtons } from "react-native-paper";
 import { useState, useEffect } from "react";
@@ -25,11 +24,11 @@ const WeeklyStats = () => {
             if (token) {
                 const days = period === 'week' ? 7 : 30;
                 
-                // Load daily tracking
+              
                 const trackingRes = await authApis(token).get(endpoints['weekly_summary']);
                 setTrackingData(trackingRes.data);
 
-                // Load progress/weight data
+               
                 const progressRes = await authApis(token).get(endpoints['chart_data'], {
                     params: { days }
                 });
@@ -66,12 +65,12 @@ const WeeklyStats = () => {
     const getCaloriesData = () => {
         const labels = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
         
-        // Map tracking data to days
+        
         const caloriesPerDay = new Array(7).fill(0);
         trackingData.forEach(item => {
             const dayIndex = new Date(item.date).getDay();
             const adjustedIndex = dayIndex === 0 ? 6 : dayIndex - 1;
-            // Giả sử có calories field hoặc tính từ steps
+          
             caloriesPerDay[adjustedIndex] = item.steps ? Math.round(item.steps * 0.04) : 0;
         });
 
@@ -118,7 +117,7 @@ const WeeklyStats = () => {
             </View>
 
             <ScrollView style={styles.content}>
-                {/* Period Selector */}
+               
                 <SegmentedButtons
                     value={period}
                     onValueChange={setPeriod}
@@ -129,7 +128,6 @@ const WeeklyStats = () => {
                     style={styles.segmentedButtons}
                 />
 
-                {/* Summary Cards */}
                 <View style={styles.summaryGrid}>
                     <Card style={styles.summaryCard}>
                         <Card.Content style={styles.summaryContent}>
@@ -156,7 +154,7 @@ const WeeklyStats = () => {
                     </Card>
                 </View>
 
-                {/* Weight Chart */}
+               
                 <Card style={styles.chartCard}>
                     <Card.Content>
                         <Text style={styles.chartTitle}>📈 Biến động cân nặng</Text>
@@ -171,7 +169,7 @@ const WeeklyStats = () => {
                     </Card.Content>
                 </Card>
 
-                {/* Calories Chart */}
+                
                 <Card style={styles.chartCard}>
                     <Card.Content>
                         <Text style={styles.chartTitle}>🔥 Calories tiêu thụ</Text>

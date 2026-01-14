@@ -1,4 +1,3 @@
-// screens/Profile/HealthProfile.js
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { TextInput, Button, RadioButton, ActivityIndicator } from "react-native-paper";
 import { useState, useEffect } from "react";
@@ -54,7 +53,7 @@ const HealthProfile = () => {
     };
 
     const handleSave = async () => {
-        // Validation
+        
         if (!formData.height || !formData.weight || !formData.age) {
             Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin!");
             return;
@@ -73,7 +72,7 @@ const HealthProfile = () => {
                 };
 
                 if (profile) {
-                    // Update existing profile and update local state immediately
+                    
                     const res = await authApis(token).patch(endpoints['health_profile'] + profile.id + '/', data);
                     setProfile(res.data);
                     setFormData({
@@ -86,7 +85,7 @@ const HealthProfile = () => {
                     setIsEditing(false);
                     Alert.alert("Thành công", "Cập nhật hồ sơ thành công!");
                 } else {
-                    // Create new profile and set it locally so UI updates immediately
+                    
                     const res = await authApis(token).post(endpoints['health_profile'], data);
                     setProfile(res.data);
                     setFormData({
@@ -137,7 +136,7 @@ const HealthProfile = () => {
 
     return (
         <View style={styles.container}>
-            {/* Header */}
+          
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => nav.goBack()} style={styles.backButton}>
                     <Text style={styles.backIcon}>←</Text>
@@ -149,7 +148,7 @@ const HealthProfile = () => {
             </View>
 
             <ScrollView style={styles.content}>
-                {/* BMI Card */}
+              
                 {profile && !isEditing && (
                     <View style={styles.bmiCard}>
                         <Text style={styles.bmiLabel}>Chỉ số BMI của bạn</Text>
@@ -160,7 +159,7 @@ const HealthProfile = () => {
                     </View>
                 )}
 
-                {/* Form */}
+               
                 <View style={styles.form}>
                     <TextInput
                         label="Chiều cao (cm)"
@@ -202,7 +201,7 @@ const HealthProfile = () => {
                         style={styles.input}
                     />
 
-                    {/* Goal Selection */}
+                   
                     <View style={styles.goalSection}>
                         <Text style={styles.goalLabel}>Mục tiêu:</Text>
                         <RadioButton.Group
@@ -221,7 +220,7 @@ const HealthProfile = () => {
                         </RadioButton.Group>
                     </View>
 
-                    {/* BMI Preview when editing */}
+                    
                     {isEditing && formData.height && formData.weight && (
                         <View style={styles.bmiPreview}>
                             <Text style={styles.previewLabel}>BMI dự kiến: </Text>
@@ -232,7 +231,7 @@ const HealthProfile = () => {
                         </View>
                     )}
 
-                    {/* Save Button */}
+                
                     {isEditing && (
                         <Button
                             mode="contained"

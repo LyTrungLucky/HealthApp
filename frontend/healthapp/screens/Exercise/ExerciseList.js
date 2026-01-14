@@ -1,4 +1,4 @@
-// screens/Exercise/ExerciseList.js
+
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, RefreshControl } from "react-native";
 import { Searchbar, Card, Chip, ActivityIndicator } from "react-native-paper";
 import { useState, useEffect } from "react";
@@ -19,11 +19,11 @@ const ExerciseList = () => {
         try {
             const token = await AsyncStorage.getItem('token');
             if (token) {
-                // Load categories
+                
                 const catRes = await authApis(token).get(endpoints['exercise_categories']);
                 setCategories(catRes.data);
 
-                // Load exercises
+               
                 let params = {};
                 if (selectedCategory) params.category_id = selectedCategory;
                 if (searchQuery) params.search = searchQuery;
@@ -106,12 +106,12 @@ const ExerciseList = () => {
 
     return (
         <View style={styles.container}>
-            {/* Header */}
+         
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Bài Tập</Text>
             </View>
 
-            {/* Search */}
+           
             <View style={styles.searchContainer}>
                 <Searchbar
                     placeholder="Tìm bài tập..."
@@ -121,7 +121,7 @@ const ExerciseList = () => {
                 />
             </View>
 
-            {/* Categories */}
+            
             <View style={styles.categoriesContainer}>
                 <FlatList
                     horizontal
@@ -141,7 +141,7 @@ const ExerciseList = () => {
                 />
             </View>
 
-            {/* Exercise List */}
+            
             <FlatList
                 data={exercises}
                 renderItem={renderExercise}

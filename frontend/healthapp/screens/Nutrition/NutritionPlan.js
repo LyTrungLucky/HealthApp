@@ -1,4 +1,4 @@
-// screens/Nutrition/NutritionPlan.js
+
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl } from "react-native";
 import { FAB, Card, Chip, ActivityIndicator } from "react-native-paper";
 import { useState, useEffect } from "react";
@@ -28,7 +28,7 @@ const NutritionPlan = () => {
     };
 
     useEffect(() => {
-        // Load plans on mount and when the screen regains focus
+       
         loadPlans();
         const unsubscribe = nav.addListener('focus', loadPlans);
         return unsubscribe;
@@ -118,7 +118,7 @@ const NutritionPlan = () => {
 
     return (
         <View style={styles.container}>
-            {/* Header */}
+           
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Kế hoạch dinh dưỡng</Text>
             </View>
@@ -142,7 +142,7 @@ const NutritionPlan = () => {
                 }
             />
 
-            {/* FAB for creating new plan */}
+           
             <FAB
                 style={styles.fab}
                 icon="plus"

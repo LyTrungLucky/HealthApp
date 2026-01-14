@@ -1,4 +1,3 @@
-// screens/Nutrition/FoodDetail.js
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert } from "react-native";
 import { Button, ActivityIndicator, Chip, List, Portal, Dialog, RadioButton, TextInput } from "react-native-paper";
 import { useState, useEffect } from "react";
@@ -92,7 +91,7 @@ const FoodDetail = () => {
             return;
         }
 
-        // If there are plans, let user pick one via alert buttons (limit to 3 shown)
+       
         const buttons = plans.slice(0, 3).map(p => ({ text: p.name, onPress: () => openPlanDialog(p.id) }));
         buttons.push({ text: 'Hủy', style: 'cancel' });
 
@@ -132,7 +131,7 @@ const FoodDetail = () => {
 
     return (
         <View style={styles.container}>
-            {/* Header */}
+            
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => nav.goBack()} style={styles.backButton}>
                     <Text style={styles.backIcon}>←</Text>
@@ -142,13 +141,13 @@ const FoodDetail = () => {
             </View>
 
             <ScrollView style={styles.content}>
-                {/* Image */}
+                
                 <Image 
                     source={food.image ? { uri: food.image } : require('../../assets/icon.png')}
                     style={styles.image}
                 />
 
-                {/* Title & Meal Type */}
+                
                 <View style={styles.titleSection}>
                     <Text style={styles.title}>{food.name}</Text>
                     <Chip style={styles.mealTypeChip}>
@@ -156,7 +155,7 @@ const FoodDetail = () => {
                     </Chip>
                 </View>
 
-                {/* Nutrition Stats */}
+               
                 <View style={styles.nutritionContainer}>
                     <View style={styles.calorieBox}>
                         <Text style={styles.calorieValue}>{food.calories}</Text>
@@ -182,7 +181,7 @@ const FoodDetail = () => {
                     </View>
                 </View>
 
-                {/* Description */}
+                
                 {food.description && (
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Mô tả</Text>
@@ -190,7 +189,7 @@ const FoodDetail = () => {
                     </View>
                 )}
 
-                {/* Recipe */}
+               
                 {food.recipe && (
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Công thức</Text>
@@ -198,7 +197,7 @@ const FoodDetail = () => {
                     </View>
                 )}
 
-                {/* Add to Plan Button */}
+               
                 <Button 
                     mode="contained" 
                     icon="calendar-plus"

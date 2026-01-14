@@ -1,4 +1,3 @@
-// screens/Reminder/CreateReminder.js
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { TextInput, Button, Card } from "react-native-paper";
 import { useState } from "react";
@@ -11,7 +10,7 @@ const CreateReminder = () => {
         title: '',
         reminder_type: 'water',
         time: '08:00',
-        days_of_week: [0, 1, 2, 3, 4], // Thứ 2 - Thứ 6
+        days_of_week: [0, 1, 2, 3, 4], 
         message: '',
     });
     const [saving, setSaving] = useState(false);
@@ -90,7 +89,7 @@ const CreateReminder = () => {
             </View>
 
             <ScrollView style={styles.content}>
-                {/* Loại nhắc nhở */}
+                
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.sectionTitle}>Loại nhắc nhở</Text>
@@ -111,7 +110,7 @@ const CreateReminder = () => {
                     </Card.Content>
                 </Card>
 
-                {/* Thông tin */}
+               
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.sectionTitle}>Thông tin</Text>
@@ -145,7 +144,7 @@ const CreateReminder = () => {
                     </Card.Content>
                 </Card>
 
-                {/* Ngày trong tuần */}
+                
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.sectionTitle}>Lặp lại vào</Text>

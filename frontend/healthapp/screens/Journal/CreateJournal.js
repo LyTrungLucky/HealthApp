@@ -144,7 +144,6 @@ const CreateJournal = () => {
 
     return (
         <View style={styles.container}>
-            {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => nav.goBack()} style={styles.backButton}>
                     <Text style={styles.backText}>← Quay lại</Text>
@@ -155,7 +154,7 @@ const CreateJournal = () => {
             </View>
 
             <ScrollView style={styles.content}>
-                {/* Date */}
+                
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.sectionTitle}>📅 Ngày</Text>
@@ -168,7 +167,7 @@ const CreateJournal = () => {
                     </Card.Content>
                 </Card>
 
-                {/* Title & Content */}
+                
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.sectionTitle}>📝 Nội dung</Text>
@@ -191,7 +190,7 @@ const CreateJournal = () => {
                     </Card.Content>
                 </Card>
 
-                {/* Mood */}
+                
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.sectionTitle}>😊 Tâm trạng</Text>
@@ -220,7 +219,7 @@ const CreateJournal = () => {
                     </Card.Content>
                 </Card>
 
-                {/* Workout */}
+                
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.sectionTitle}>🏃‍♂️ Tập luyện</Text>
@@ -245,7 +244,7 @@ const CreateJournal = () => {
                     </Card.Content>
                 </Card>
 
-                {/* Energy Level */}
+                
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.sectionTitle}>⚡ Mức năng lượng: {journal.energy_level}/10</Text>
@@ -271,7 +270,7 @@ const CreateJournal = () => {
                     </Card.Content>
                 </Card>
 
-                {/* Sleep */}
+                
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.sectionTitle}>😴 Giấc ngủ</Text>
@@ -286,7 +285,7 @@ const CreateJournal = () => {
                     </Card.Content>
                 </Card>
 
-                {/* Image */}
+                
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.sectionTitle}>📷 Hình ảnh (tùy chọn)</Text>
@@ -310,7 +309,7 @@ const CreateJournal = () => {
                     </Card.Content>
                 </Card>
 
-                {/* Save Button */}
+                
                 <Button
                     mode="contained"
                     onPress={saveJournal}

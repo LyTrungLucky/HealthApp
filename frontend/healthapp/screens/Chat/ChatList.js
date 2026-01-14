@@ -13,7 +13,7 @@ const ChatList = () => {
 
     useEffect(() => {
         loadChatRooms();
-        // Polling mỗi 10s để cập nhật danh sách
+        
         const interval = setInterval(loadChatRooms, 10000);
         return () => clearInterval(interval);
     }, []);
@@ -37,9 +37,9 @@ const ChatList = () => {
         const now = new Date();
         const diff = now - date;
 
-        if (diff < 86400000) { // < 24h
+        if (diff < 86400000) { 
             return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-        } else if (diff < 604800000) { // < 7 ngày
+        } else if (diff < 604800000) { 
             return date.toLocaleDateString('vi-VN', { weekday: 'short' });
         }
         return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });

@@ -45,7 +45,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
         user = User.objects.create_user(
             password=password,
-            role='user',  # ✅ FIX CỨNG
+            role='user',
             **validated_data
         )
         return user

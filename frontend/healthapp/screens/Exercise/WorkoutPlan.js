@@ -1,4 +1,4 @@
-// screens/Exercise/WorkoutPlan.js
+
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl } from "react-native";
 import { FAB, Card, Chip, ActivityIndicator } from "react-native-paper";
 import { useState, useEffect } from "react";
@@ -28,7 +28,7 @@ const WorkoutPlan = () => {
     };
 
     useEffect(() => {
-        // Load plans on mount and when the screen regains focus
+        
         loadPlans();
         const unsubscribe = nav.addListener('focus', loadPlans);
         return unsubscribe;
@@ -113,7 +113,7 @@ const WorkoutPlan = () => {
 
     return (
         <View style={styles.container}>
-            {/* Header */}
+            
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Kế hoạch tập luyện</Text>
             </View>
@@ -137,7 +137,7 @@ const WorkoutPlan = () => {
                 }
             />
 
-            {/* FAB for creating new plan */}
+           
             <FAB
                 style={styles.fab}
                 icon="plus"

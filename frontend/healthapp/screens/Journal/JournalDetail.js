@@ -96,7 +96,7 @@ const JournalDetail = () => {
 
     return (
         <View style={styles.container}>
-            {/* Header */}
+            
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => nav.goBack()} style={styles.backButton}>
                     <Text style={styles.backText}>← Quay lại</Text>
@@ -113,7 +113,7 @@ const JournalDetail = () => {
             </View>
 
             <ScrollView style={styles.content}>
-                {/* Date & Title */}
+                
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.date}>
@@ -123,7 +123,7 @@ const JournalDetail = () => {
                     </Card.Content>
                 </Card>
 
-                {/* Mood & Status */}
+                
                 <Card style={styles.card}>
                     <Card.Content>
                         <View style={styles.statusRow}>
@@ -152,7 +152,7 @@ const JournalDetail = () => {
                     </Card.Content>
                 </Card>
 
-                {/* Content */}
+                
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.sectionTitle}>📝 Nội dung</Text>
@@ -160,7 +160,7 @@ const JournalDetail = () => {
                     </Card.Content>
                 </Card>
 
-                {/* Workout Notes */}
+                
                 {journal.workout_completed && journal.workout_notes && (
                     <Card style={styles.card}>
                         <Card.Content>
@@ -170,7 +170,7 @@ const JournalDetail = () => {
                     </Card>
                 )}
 
-                {/* Stats */}
+                
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.sectionTitle}>📊 Thống kê</Text>
@@ -187,7 +187,7 @@ const JournalDetail = () => {
                             </View>
                         </View>
 
-                        {/* Energy Level Visual */}
+                        
                         <View style={styles.energyBar}>
                             <Text style={styles.energyLabel}>Mức năng lượng:</Text>
                             <View style={styles.energyTrack}>
@@ -202,7 +202,7 @@ const JournalDetail = () => {
                     </Card.Content>
                 </Card>
 
-                {/* Image */}
+                
                 {journal.image && (
                     <Card style={styles.card}>
                         <Card.Content>
@@ -212,7 +212,7 @@ const JournalDetail = () => {
                     </Card>
                 )}
 
-                {/* Created/Updated Info */}
+                
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.metaInfo}>
@@ -227,7 +227,7 @@ const JournalDetail = () => {
                 </Card>
             </ScrollView>
 
-            {/* Action Buttons */}
+            
             <View style={styles.actionButtons}>
                 <Button
                     mode="contained"

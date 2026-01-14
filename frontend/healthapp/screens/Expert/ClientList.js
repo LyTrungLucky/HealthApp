@@ -23,7 +23,7 @@ const ClientList = () => {
         finally { setLoading(false); }
     };
 
-    // Expert bắt đầu chat với client
+    
     const startChat = async (clientId) => {
         try {
             const token = await AsyncStorage.getItem('token');
@@ -65,7 +65,7 @@ const ClientList = () => {
                                 <Chip compact>{item.bmi} BMI</Chip>
                             </TouchableOpacity>
                             
-                            {/* Nút xem tiến độ và chat */}
+                           
                             <View style={{flexDirection:'row', gap: 10}}>
                                 <Button 
                                     mode="outlined" 

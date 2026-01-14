@@ -23,7 +23,7 @@ const UserMenu = () => {
   const openMenu = () => {
     avatarRef.current?.measureInWindow((x, y, width, height) => {
       setMenuPos({
-        top: y + height + 6, // 👈 ngay dưới avatar
+        top: y + height + 6, 
         right: 16,
       });
       setVisible(true);
@@ -39,7 +39,7 @@ const UserMenu = () => {
 
   return (
     <View>
-      {/* AVATAR */}
+      
       <TouchableOpacity ref={avatarRef} onPress={openMenu}>
         <Avatar.Image
           size={40}
@@ -52,7 +52,7 @@ const UserMenu = () => {
         />
       </TouchableOpacity>
 
-      {/* MODAL */}
+      
       <Modal transparent visible={visible} animationType="fade">
         <Pressable
           style={styles.backdrop}

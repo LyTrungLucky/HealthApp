@@ -1,4 +1,3 @@
-// screens/Nutrition/FoodList.js
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, RefreshControl } from "react-native";
 import { Searchbar, Chip, ActivityIndicator } from "react-native-paper";
 import { useState, useEffect } from "react";
@@ -95,12 +94,12 @@ const FoodList = () => {
 
     return (
         <View style={styles.container}>
-            {/* Header */}
+            
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Thực Đơn Dinh Dưỡng</Text>
             </View>
 
-            {/* Search */}
+            
             <View style={styles.searchContainer}>
                 <Searchbar
                     placeholder="Tìm món ăn..."
@@ -110,7 +109,7 @@ const FoodList = () => {
                 />
             </View>
 
-            {/* Meal Types */}
+            
             <View style={styles.mealTypesContainer}>
                 <FlatList
                     horizontal
@@ -130,7 +129,7 @@ const FoodList = () => {
                 />
             </View>
 
-            {/* Food List */}
+            
             <FlatList
                 data={foods}
                 renderItem={renderFood}

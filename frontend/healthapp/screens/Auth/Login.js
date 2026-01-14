@@ -19,7 +19,7 @@ const Login = ({ route }) => {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
-    /* ================= VALIDATE ================= */
+   
     const validate = () => {
         if (!user.username || !user.password) {
             setErr("Vui lòng nhập đầy đủ thông tin!");
@@ -29,7 +29,7 @@ const Login = ({ route }) => {
         return true;
     };
 
-    /* ================= LOGIN ================= */
+    
     const login = async () => {
     if (!validate()) return;
 
@@ -72,7 +72,7 @@ const Login = ({ route }) => {
 };
 
 
-    /* ================= UI ================= */
+    
     return (
         <View style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContent}>

@@ -282,7 +282,6 @@ class HealthJournal(BaseModel):
 
 
 class ChatRoom(BaseModel):
-    """Phòng chat giữa user và expert"""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chat_rooms')
     expert = models.ForeignKey(User, on_delete=models.CASCADE, related_name='expert_chat_rooms',
                                limit_choices_to={'role__in': ['nutritionist', 'trainer']})
@@ -298,7 +297,6 @@ class ChatRoom(BaseModel):
 
 
 class Message(BaseModel):
-    """Tin nhắn trong phòng chat"""
     chat_room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField()

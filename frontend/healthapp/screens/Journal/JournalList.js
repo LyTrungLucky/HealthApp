@@ -13,7 +13,7 @@ const JournalList = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [filterMood, setFilterMood] = useState('all');
     const [filterWorkout, setFilterWorkout] = useState('all');
-    const [viewMode, setViewMode] = useState('list'); // 'list' or 'calendar'
+    const [viewMode, setViewMode] = useState('list'); 
     const nav = useNavigation();
 
     const moodEmojis = {
@@ -103,7 +103,7 @@ const moodLabels = {
 
     return (
         <View style={styles.container}>
-            {/* Header */}
+            
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>📖 Nhật ký sức khỏe</Text>
             </View>
@@ -114,7 +114,7 @@ const moodLabels = {
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
                 }
             >
-                {/* Search Bar */}
+                
                 <Searchbar
                     placeholder="Tìm kiếm nhật ký..."
                     onChangeText={setSearchQuery}
@@ -122,7 +122,7 @@ const moodLabels = {
                     style={styles.searchBar}
                 />
 
-                {/* Filters */}
+                
                 <Card style={styles.filterCard}>
                     <Card.Content>
                         <Text style={styles.filterTitle}>Lọc theo tâm trạng:</Text>
@@ -175,7 +175,7 @@ const moodLabels = {
                     </Card.Content>
                 </Card>
 
-                {/* Journal List */}
+                
                 {filteredJournals.length === 0 ? (
                     <Card style={styles.emptyCard}>
                         <Card.Content style={styles.emptyContent}>
@@ -242,7 +242,7 @@ const moodLabels = {
                 )}
             </ScrollView>
 
-            {/* FAB */}
+            
             <FAB
                 icon="plus"
                 style={styles.fab}

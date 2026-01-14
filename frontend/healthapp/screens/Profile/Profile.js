@@ -1,4 +1,3 @@
-// screens/Profile/Profile.js
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image } from "react-native";
 import { List, Divider, Avatar } from "react-native-paper";
 import { useContext } from "react";
@@ -39,13 +38,13 @@ const Profile = () => {
 
     return (
         <View style={styles.container}>
-            {/* Header */}
+            
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Hồ Sơ</Text>
             </View>
 
             <ScrollView style={styles.content}>
-                {/* User Info Card */}
+                
                 <View style={styles.userCard}>
                     <Avatar.Image
                         size={80}
@@ -59,7 +58,7 @@ const Profile = () => {
                     <Text style={styles.userEmail}>{user?.email}</Text>
                 </View>
 
-                {/* Health Section */}
+                
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Sức khỏe</Text>
 
@@ -118,7 +117,7 @@ const Profile = () => {
 
                 </View>
 
-                {/* Plans Section */}
+                
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Kế hoạch</Text>
 
@@ -143,7 +142,7 @@ const Profile = () => {
                     />
                 </View>
 
-                {/* Settings Section */}
+                
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Cài đặt</Text>
 
@@ -152,7 +151,7 @@ const Profile = () => {
                         description="Cập nhật thông tin"
                         left={props => <List.Icon {...props} icon="account-edit" color="#607d8b" />}
                         right={props => <List.Icon {...props} icon="chevron-right" />}
-                        onPress={() => {/* TODO: Navigate to edit profile */ }}
+                        onPress={() => { }}
                         style={styles.listItem}
                     />
 
@@ -163,12 +162,12 @@ const Profile = () => {
                         description="Thay đổi mật khẩu"
                         left={props => <List.Icon {...props} icon="lock-reset" color="#795548" />}
                         right={props => <List.Icon {...props} icon="chevron-right" />}
-                        onPress={() => {/* TODO: Navigate to change password */ }}
+                        onPress={() => { }}
                         style={styles.listItem}
                     />
                 </View>
 
-                {/* Logout Button */}
+                
                 <TouchableOpacity style={styles.logoutButton} onPress={logout}>
                     <Text style={styles.logoutText}>Đăng xuất</Text>
                 </TouchableOpacity>

@@ -45,14 +45,14 @@ const Progress = () => {
         }
     };
 
-    // Hàm xử lý data theo period
+    
     const getChartData = (dataKey) => {
         if (!rawData.length) return { labels: [''], datasets: [{ data: [0] }] };
 
-        const sorted = [...rawData].reverse(); // Cũ → Mới
+        const sorted = [...rawData].reverse(); 
 
         if (period === 7) {
-            // TUẦN: Hiển thị từng ngày (7 điểm)
+            
             const recent = sorted.slice(-7);
             return {
                 labels: recent.map(d => new Date(d.date).getDate().toString()),
@@ -66,7 +66,7 @@ const Progress = () => {
             };
 
         } else if (period === 30) {
-            // THÁNG: Trung bình mỗi tuần (4 điểm)
+            
             const weeks = [];
             const dataToUse = sorted.slice(-28);
 
@@ -94,7 +94,7 @@ const Progress = () => {
             };
 
         } else {
-            // NĂM: Trung bình mỗi tháng (tối đa 12 điểm)
+            
             const months = {};
 
             sorted.forEach(d => {
@@ -190,7 +190,7 @@ const Progress = () => {
             </View>
 
             <ScrollView style={{ flex: 1 }}>
-                {/* Period Selector */}
+                
                 <Card style={{ margin: 15 }}>
                     <Card.Content>
                         <Text style={{ fontWeight: 'bold', marginBottom: 10 }}>Thời gian</Text>
@@ -214,7 +214,7 @@ const Progress = () => {
                     </Card.Content>
                 </Card>
 
-                {/* Chart Type Selector */}
+                
                 <Card style={{ margin: 15, marginTop: 0 }}>
                     <Card.Content>
                         <Text style={{ fontWeight: 'bold', marginBottom: 10 }}>Loại biểu đồ</Text>
@@ -248,7 +248,7 @@ const Progress = () => {
                     </Card.Content>
                 </Card>
 
-                {/* Dynamic Chart Display */}
+                
                 <Card style={{ margin: 15, marginTop: 0 }}>
                     <Card.Content>
                         <Text style={{ fontWeight: 'bold', marginBottom: 15, fontSize: 16 }}>
@@ -265,7 +265,7 @@ const Progress = () => {
                     </Card.Content>
                 </Card>
 
-                {/* Weekly Summary */}
+                
                 <Card style={{ margin: 15, marginTop: 0 }}>
                     <Card.Content>
                         <Text style={{ fontWeight: 'bold', marginBottom: 15, fontSize: 16 }}>
@@ -297,7 +297,7 @@ const Progress = () => {
                     </Card.Content>
                 </Card>
 
-                {/* Action Buttons */}
+                
                 <View style={{ padding: 15, gap: 10 }}>
                     <Button
                         mode="contained"

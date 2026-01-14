@@ -1,4 +1,3 @@
-// screens/Profile/DailyTracking.js
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { TextInput, Button, ActivityIndicator } from "react-native-paper";
 import { useState, useEffect } from "react";
