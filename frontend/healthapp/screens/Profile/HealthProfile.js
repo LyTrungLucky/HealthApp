@@ -73,16 +73,32 @@ const HealthProfile = () => {
                 };
 
                 if (profile) {
-                    // Update existing profile
-                    await authApis(token).patch(endpoints['health_profile'] + profile.id + '/', data);
+                    // Update existing profile and update local state immediately
+                    const res = await authApis(token).patch(endpoints['health_profile'] + profile.id + '/', data);
+                    setProfile(res.data);
+                    setFormData({
+                        height: res.data.height.toString(),
+                        weight: res.data.weight.toString(),
+                        age: res.data.age.toString(),
+                        goal: res.data.goal,
+                        target_weight: res.data.target_weight?.toString() || '',
+                    });
+                    setIsEditing(false);
                     Alert.alert("Thành công", "Cập nhật hồ sơ thành công!");
                 } else {
-                    // Create new profile
-                    await authApis(token).post(endpoints['health_profile'], data);
+                    // Create new profile and set it locally so UI updates immediately
+                    const res = await authApis(token).post(endpoints['health_profile'], data);
+                    setProfile(res.data);
+                    setFormData({
+                        height: res.data.height.toString(),
+                        weight: res.data.weight.toString(),
+                        age: res.data.age.toString(),
+                        goal: res.data.goal,
+                        target_weight: res.data.target_weight?.toString() || '',
+                    });
+                    setIsEditing(false);
                     Alert.alert("Thành công", "Tạo hồ sơ thành công!");
                 }
-                
-                loadProfile();
             }
         } catch (error) {
             console.error(error);

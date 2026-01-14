@@ -8,32 +8,61 @@ import { authApis, endpoints } from "../../utils/Apis";
 import { MyUserContext } from "../../utils/contexts/MyContext";
 
 const ExpertList = () => {
+    
+
     const [experts, setExperts] = useState([]);
+    const [consultationMap, setConsultationMap] = useState({});
     const [selectedRole, setSelectedRole] = useState(null);
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [user] = useContext(MyUserContext);
     const nav = useNavigation();
 
     const roles = [
-        { value: null, label: 'Tất cả' },
-        { value: 'nutritionist', label: 'Dinh dưỡng' },
-        { value: 'trainer', label: 'Huấn luyện viên' },
+        { value: null, label: "Tất cả" },
+        { value: "nutritionist", label: "Dinh dưỡng" },
+        { value: "trainer", label: "Huấn luyện viên" }
     ];
+
+    const loadConsultationByExpert = async (expertId) => {
+        try {
+            const token = await AsyncStorage.getItem("token");
+            if (!token) return null;
+
+            const res = await authApis(token).get(
+                `${endpoints["consultations"]}by-expert/${expertId}/`
+            );
+            return res.data;
+        } catch {
+            return null;
+        }
+    };
 
     const loadExperts = async () => {
         try {
-            const token = await AsyncStorage.getItem('token');
-            if (token) {
-                let params = {};
-                if (selectedRole) params.role = selectedRole;
+            const token = await AsyncStorage.getItem("token");
+            if (!token) return;
 
-                const res = await authApis(token).get(endpoints['experts'], { params });
-                setExperts(res.data);
+            let params = {};
+            if (selectedRole) params.role = selectedRole;
+            if (searchQuery) params.search = searchQuery;
+
+            const res = await authApis(token).get(
+                endpoints["experts"],
+                { params }
+            );
+            setExperts(res.data);
+
+            const map = {};
+            for (let expert of res.data) {
+                const c = await loadConsultationByExpert(expert.id);
+                if (c) map[expert.id] = c;
             }
-        } catch (error) {
-            console.error(error);
+            setConsultationMap(map);
+
+        } catch (err) {
+            console.error(err);
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -44,9 +73,100 @@ const ExpertList = () => {
         loadExperts();
     }, [selectedRole]);
 
+    useEffect(() => {
+        const t = setTimeout(() => {
+            setLoading(true);
+            loadExperts();
+        }, 500);
+        return () => clearTimeout(t);
+    }, [searchQuery]);
+
     const onRefresh = () => {
         setRefreshing(true);
         loadExperts();
+    };
+
+    const connectExpert = async (expertId) => {
+        try {
+            const token = await AsyncStorage.getItem("token");
+            if (!token) {
+                Alert.alert("Thông báo", "Vui lòng đăng nhập");
+                return;
+            }
+
+            const appointmentDate = new Date(
+                Date.now() + 24 * 60 * 60 * 1000
+            ).toISOString();
+
+            const res = await authApis(token).post(
+                endpoints["consultations"],
+                {
+                    expert: expertId,
+                    appointment_date: appointmentDate
+                }
+            );
+
+            setConsultationMap(prev => ({
+                ...prev,
+                [expertId]: res.data
+            }));
+
+            Alert.alert("Thành công", "Yêu cầu tư vấn đã được gửi");
+
+        } catch (err) {
+            Alert.alert("Lỗi", "Không thể gửi yêu cầu tư vấn");
+        }
+    };
+
+    const renderConsultButton = (expertId) => {
+        const consultation = consultationMap[expertId];
+
+        if (!consultation) {
+            return (
+                <Button
+                    mode="contained"
+                    onPress={() => connectExpert(expertId)}
+                >
+                    Yêu cầu tư vấn
+                </Button>
+            );
+        }
+
+        switch (consultation.status) {
+            case "pending":
+                return (
+                    <Button mode="outlined" disabled>
+                        Chờ xác nhận
+                    </Button>
+                );
+
+            case "confirmed":
+                return (
+                    <Button
+                        mode="contained"
+                        onPress={() =>
+                            nav.navigate("ConsultationRoom", {
+                                consultationId: consultation.id
+                            })
+                        }
+                    >
+                        Bắt đầu tư vấn
+                    </Button>
+                );
+
+            case "cancelled":
+                return (
+                    <Button
+                        mode="contained"
+                        onPress={() => connectExpert(expertId)}
+                    >
+                        Gửi lại yêu cầu
+                    </Button>
+                );
+
+            default:
+                return null;
+        }
     };
 
     const getRoleLabel = (role) => {
@@ -77,19 +197,20 @@ const ExpertList = () => {
             <Card.Content>
                 <View style={styles.expertHeader}>
                     <Image
-                        source={item.avatar ? { uri: item.avatar } : require('../../assets/icon.png')}
+                        source={
+                            item.avatar
+                                ? { uri: item.avatar }
+                                : require("../../assets/icon.png")
+                        }
                         style={styles.avatar}
                     />
                     <View style={styles.expertInfo}>
                         <Text style={styles.expertName}>
-                            {item.first_name} {item.last_name}
+                            {item.first_name || item.username} {item.last_name}
                         </Text>
-                        <Chip style={styles.roleChip} textStyle={styles.roleText}>
+                        <Chip style={styles.roleChip}>
                             {getRoleLabel(item.role)}
                         </Chip>
-                        {item.bio && (
-                            <Text style={styles.bio} numberOfLines={2}>{item.bio}</Text>
-                        )}
                     </View>
                 </View>
                 
@@ -117,7 +238,7 @@ const ExpertList = () => {
     if (loading) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#3b5998" />
+                <ActivityIndicator size="large" />
             </View>
         );
     }
@@ -144,18 +265,16 @@ const ExpertList = () => {
             <View style={styles.searchContainer}>
                 <Searchbar
                     placeholder="Tìm chuyên gia..."
-                    onChangeText={setSearchQuery}
                     value={searchQuery}
-                    style={styles.searchBar}
+                    onChangeText={setSearchQuery}
                 />
             </View>
 
             <View style={styles.rolesContainer}>
                 <FlatList
                     horizontal
-                    showsHorizontalScrollIndicator={false}
                     data={roles}
-                    keyExtractor={(item) => item.value || 'all'}
+                    keyExtractor={(item) => item.value || "all"}
                     renderItem={({ item }) => (
                         <Chip
                             selected={selectedRole === item.value}
@@ -174,11 +293,16 @@ const ExpertList = () => {
                 keyExtractor={(item) => item.id.toString()}
                 contentContainerStyle={styles.listContainer}
                 refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                    />
                 }
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
-                        <Text style={styles.emptyText}>Không có chuyên gia nào</Text>
+                        <Text style={styles.emptyText}>
+                            Không có chuyên gia nào
+                        </Text>
                     </View>
                 }
             />
@@ -285,6 +409,12 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#999',
     },
+    expertInfo: { flex: 1 },
+    expertName: { fontSize: 18, fontWeight: "bold" },
+    roleChip: { alignSelf: "flex-start", marginTop: 5 },
+    roleChipFilter: { marginRight: 8 },
+    emptyContainer: { padding: 40, alignItems: "center" },
+    emptyText: { color: "#999" }
 });
 
 export default ExpertList;

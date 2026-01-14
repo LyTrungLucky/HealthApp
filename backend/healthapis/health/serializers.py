@@ -242,12 +242,15 @@ class ProgressSerializer(serializers.ModelSerializer):
 
 class ConsultationSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
-    expert = UserSerializer(read_only=True)
+    expert = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.filter(role__in=['nutritionist', 'trainer'])
+    )
     status_display = serializers.CharField(source='get_status_display', read_only=True)
 
     class Meta:
         model = Consultation
         fields = '__all__'
+
 
 
 # Serializer cho đăng ký

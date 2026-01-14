@@ -1,6 +1,6 @@
 // screens/Exercise/ExerciseDetail.js
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Linking } from "react-native";
-import { Button, ActivityIndicator, Chip } from "react-native-paper";
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Linking, Alert } from "react-native";
+import { Button, ActivityIndicator, Chip, Portal, Dialog, RadioButton, TextInput } from "react-native-paper";
 import { useState, useEffect } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -9,12 +9,24 @@ import { authApis, endpoints } from "../../utils/Apis";
 const ExerciseDetail = () => {
     const [exercise, setExercise] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [plans, setPlans] = useState([]);
+    const [plansLoading, setPlansLoading] = useState(false);
+    const [dialogVisible, setDialogVisible] = useState(false);
+    const [selectedPlanId, setSelectedPlanId] = useState(null);
+    const [selectedWeekday, setSelectedWeekday] = useState(0);
+    const [setsCount, setSetsCount] = useState('3');
+    const [repsCount, setRepsCount] = useState('10');
     const route = useRoute();
     const nav = useNavigation();
     const { exerciseId } = route.params;
 
     useEffect(() => {
         loadExercise();
+    }, []);
+
+    useEffect(() => {
+        // load user's workout plans for quick add
+        loadPlans();
     }, []);
 
     const loadExercise = async () => {
@@ -28,6 +40,21 @@ const ExerciseDetail = () => {
             console.error(error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const loadPlans = async () => {
+        setPlansLoading(true);
+        try {
+            const token = await AsyncStorage.getItem('token');
+            if (token) {
+                const res = await authApis(token).get(endpoints['workout_plans']);
+                setPlans(res.data);
+            }
+        } catch (error) {
+            console.error('Load plans error', error);
+        } finally {
+            setPlansLoading(false);
         }
     };
 
@@ -52,6 +79,56 @@ const ExerciseDetail = () => {
             case 'medium': return 'Trung bình';
             case 'hard': return 'Khó';
             default: return '';
+        }
+    };
+
+    const handleAddToPlan = () => {
+        if (plansLoading) {
+            Alert.alert('Vui lòng chờ', 'Đang tải kế hoạch...');
+            return;
+        }
+
+        if (!plans || plans.length === 0) {
+            Alert.alert(
+                'Chưa có kế hoạch',
+                'Bạn chưa có kế hoạch tập luyện nào. Muốn tạo mới?'
+            , [
+                { text: 'Hủy', style: 'cancel' },
+                { text: 'Tạo', onPress: () => nav.navigate('Plans', { screen: 'CreateWorkoutPlan' }) }
+            ]);
+            return;
+        }
+
+        const buttons = plans.slice(0,3).map(p => ({ text: p.name, onPress: () => openPlanDialog(p.id) }));
+        buttons.push({ text: 'Hủy', style: 'cancel' });
+        Alert.alert('Chọn kế hoạch', 'Chọn kế hoạch để thêm bài tập', buttons);
+    };
+
+    const openPlanDialog = (planId) => {
+        setSelectedPlanId(planId);
+        setSelectedWeekday(0);
+        setSetsCount('3');
+        setRepsCount('10');
+        setDialogVisible(true);
+    };
+
+    const confirmAdd = async () => {
+        setDialogVisible(false);
+        try {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) { Alert.alert('Yêu cầu đăng nhập', 'Vui lòng đăng nhập để thêm bài tập'); return; }
+
+            await authApis(token).post(endpoints['add_exercise_to_plan'](selectedPlanId), {
+                exercise_id: exercise.id,
+                weekday: selectedWeekday,
+                sets: parseInt(setsCount,10) || 3,
+                reps: parseInt(repsCount,10) || 10,
+            });
+
+            Alert.alert('Thành công', 'Đã thêm bài tập vào kế hoạch');
+        } catch (error) {
+            console.error('Add exercise error', error);
+            Alert.alert('Lỗi', 'Không thể thêm bài tập vào kế hoạch');
         }
     };
 
@@ -146,11 +223,36 @@ const ExerciseDetail = () => {
                 <Button 
                     mode="outlined" 
                     icon="calendar-plus"
-                    onPress={() => nav.navigate('Plans', { screen: 'WorkoutPlan', params: { exerciseToAdd: exercise } })}
+                    onPress={handleAddToPlan}
                     style={styles.addButton}
                 >
                     Thêm vào kế hoạch
                 </Button>
+
+                <Portal>
+                    <Dialog visible={dialogVisible} onDismiss={() => setDialogVisible(false)}>
+                        <Dialog.Title>Thêm bài tập vào kế hoạch</Dialog.Title>
+                        <Dialog.Content>
+                            <Text style={{ marginBottom: 8 }}>{exercise ? exercise.name : ''}</Text>
+                            <RadioButton.Group onValueChange={v => setSelectedWeekday(parseInt(v,10))} value={String(selectedWeekday)}>
+                                <RadioButton.Item label="Thứ 2" value="0" />
+                                <RadioButton.Item label="Thứ 3" value="1" />
+                                <RadioButton.Item label="Thứ 4" value="2" />
+                                <RadioButton.Item label="Thứ 5" value="3" />
+                                <RadioButton.Item label="Thứ 6" value="4" />
+                                <RadioButton.Item label="Thứ 7" value="5" />
+                                <RadioButton.Item label="Chủ nhật" value="6" />
+                            </RadioButton.Group>
+
+                            <TextInput label="Sets" value={setsCount} onChangeText={setSetsCount} keyboardType="numeric" style={{ marginTop: 8 }} />
+                            <TextInput label="Reps" value={repsCount} onChangeText={setRepsCount} keyboardType="numeric" style={{ marginTop: 8 }} />
+                        </Dialog.Content>
+                        <Dialog.Actions>
+                            <Button onPress={() => setDialogVisible(false)}>Hủy</Button>
+                            <Button onPress={confirmAdd}>Thêm</Button>
+                        </Dialog.Actions>
+                    </Dialog>
+                </Portal>
             </ScrollView>
         </View>
     );

@@ -10,7 +10,7 @@ const CreateWorkoutPlan = () => {
     const [healthProfile, setHealthProfile] = useState(null);
     const [templates, setTemplates] = useState([]);
     const [recommendedExercises, setRecommendedExercises] = useState([]);
-    const [selectedExercises, setSelectedExercises] = useState([]);
+    const [selectedExercises, setSelectedExercises] = useState([]); // items will include weekday property when selected
     const [selectedTemplate, setSelectedTemplate] = useState(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -56,7 +56,12 @@ const CreateWorkoutPlan = () => {
                 setRecommendedExercises(exercisesRes.data);
             }
         } catch (error) {
-            console.error(error);
+            // If there's no profile yet the backend may return 404 — handle silently
+            if (error?.response?.status === 404) {
+                // no profile -> leave `healthProfile` as null (UI will prompt user)
+            } else {
+                console.error('Error loading workout data:', error);
+            }
         } finally {
             setLoading(false);
         }
@@ -76,6 +81,36 @@ const CreateWorkoutPlan = () => {
         }
     };
 
+    const handleUseTemplate = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            if (token && templates.length === 0) {
+                await loadTemplates();
+            }
+
+            if (!templates || templates.length === 0) {
+                Alert.alert('Không có mẫu', 'Không tìm thấy kế hoạch mẫu phù hợp.');
+                return;
+            }
+
+            const buttons = templates.slice(0, 5).map((t) => ({
+                text: t.name,
+                onPress: () => handleSelectTemplate(t)
+            }));
+
+            if (templates.length > 5) {
+                buttons.push({ text: 'Xem tất cả', onPress: () => handleSelectTemplate(templates[0]) });
+            }
+
+            buttons.push({ text: 'Hủy', style: 'cancel' });
+
+            Alert.alert('Chọn kế hoạch mẫu', 'Chọn một mẫu để áp dụng', buttons);
+        } catch (error) {
+            console.error('Error opening templates:', error);
+            Alert.alert('Lỗi', 'Không thể tải danh sách mẫu.');
+        }
+    };
+
     const handleSelectTemplate = async (template) => {
         setSelectedTemplate(template);
         setFormData({
@@ -88,8 +123,13 @@ const CreateWorkoutPlan = () => {
             const token = await AsyncStorage.getItem('token');
             if (token) {
                 const schedulesRes = await authApis(token).get(endpoints['workout_schedules'](template.id));
-                const exerciseIds = schedulesRes.data.map(s => s.exercise.id);
-                const selected = recommendedExercises.filter(ex => exerciseIds.includes(ex.id));
+                const weekdayMap = {};
+                schedulesRes.data.forEach(s => { weekdayMap[s.exercise.id] = s.weekday; });
+
+                const selected = recommendedExercises
+                    .filter(ex => Object.keys(weekdayMap).includes(String(ex.id)))
+                    .map(ex => ({ ...ex, weekday: weekdayMap[ex.id] ?? 0 }));
+
                 setSelectedExercises(selected);
                 
                 Alert.alert(
@@ -128,8 +168,13 @@ const CreateWorkoutPlan = () => {
         if (isSelected) {
             setSelectedExercises(selectedExercises.filter(ex => ex.id !== exercise.id));
         } else {
-            setSelectedExercises([...selectedExercises, exercise]);
+            // default weekday 0 (Thứ 2)
+            setSelectedExercises([...selectedExercises, { ...exercise, weekday: 0 }]);
         }
+    };
+
+    const setExerciseWeekday = (exerciseId, weekday) => {
+        setSelectedExercises(selectedExercises.map(ex => ex.id === exerciseId ? { ...ex, weekday } : ex));
     };
 
     const handleSave = async () => {
@@ -162,18 +207,14 @@ const CreateWorkoutPlan = () => {
                 const planRes = await authApis(token).post(endpoints['workout_plans'], planData);
                 const planId = planRes.data.id;
 
-                const workoutDays = [0, 2, 4];
-                const exercisesPerDay = Math.ceil(selectedExercises.length / 3);
-
+                // Use selected weekday from each selected exercise (default 0 if missing)
                 for (let i = 0; i < selectedExercises.length; i++) {
-                    const dayIndex = Math.floor(i / exercisesPerDay);
-                    const weekday = workoutDays[dayIndex] || workoutDays[0];
-                    
+                    const item = selectedExercises[i];
                     const scheduleData = {
-                        exercise_id: selectedExercises[i].id,
-                        weekday: weekday,
-                        sets: 3,
-                        reps: 15,
+                        exercise_id: item.id,
+                        weekday: item.weekday ?? 0,
+                        sets: item.sets ?? 3,
+                        reps: item.reps ?? 15,
                     };
 
                     await authApis(token).post(
@@ -225,6 +266,8 @@ const CreateWorkoutPlan = () => {
                 <View style={styles.placeholder} />
             </View>
 
+            {/* Section toggle removed: this screen only creates workout plans */}
+
             <ScrollView style={styles.content}>
                 {/* Mode Selection */}
                 <Card style={styles.card}>
@@ -269,48 +312,23 @@ const CreateWorkoutPlan = () => {
                                 </View>
                             ))}
                         </RadioButton.Group>
+                        {mode === 'template' && (
+                            <Button
+                                mode="outlined"
+                                onPress={handleUseTemplate}
+                                style={styles.templateButton}
+                                icon="lightbulb-on"
+                            >
+                                Sử dụng kế hoạch mẫu
+                            </Button>
+                        )}
                     </Card.Content>
                 </Card>
 
-                {/* Templates List (if template mode) */}
-                {mode === 'template' && templates.length > 0 && (
-                    <Card style={styles.card}>
-                        <Card.Content>
-                            <Text style={styles.sectionTitle}>Kế hoạch mẫu có sẵn</Text>
-                            {templates.map((template) => (
-                                <Card key={template.id} style={styles.templateCard}>
-                                    <Card.Content>
-                                        <Text style={styles.templateName}>{template.name}</Text>
-                                        <Text style={styles.templateDescription}>{template.description}</Text>
-                                        <Text style={styles.templateMeta}>
-                                            💪 {template.total_exercises || 0} bài tập
-                                        </Text>
-                                        <View style={styles.templateButtons}>
-                                            <Button
-                                                mode="outlined"
-                                                onPress={() => handleSelectTemplate(template)}
-                                                style={styles.templateButton}
-                                            >
-                                                Chỉnh sửa
-                                            </Button>
-                                            <Button
-                                                mode="contained"
-                                                onPress={() => handleCloneTemplate(template.id)}
-                                                style={styles.templateButton}
-                                                loading={saving}
-                                            >
-                                                Sao chép
-                                            </Button>
-                                        </View>
-                                    </Card.Content>
-                                </Card>
-                            ))}
-                        </Card.Content>
-                    </Card>
-                )}
+                {/* Templates are selected via the "Sử dụng kế hoạch mẫu" button; show plan editor UI for both modes */}
 
-                {/* Plan Details (if custom or after selecting template) */}
-                {(mode === 'custom' || selectedTemplate) && (
+                {/* Plan Details (show when custom, template mode, or after selecting a template) */}
+                {(mode === 'custom' || mode === 'template' || selectedTemplate) && (
                     <>
                         <Card style={styles.card}>
                             <Card.Content>
@@ -361,7 +379,8 @@ const CreateWorkoutPlan = () => {
 
                                 <View style={styles.exerciseList}>
                                     {recommendedExercises.map((exercise) => {
-                                        const isSelected = selectedExercises.find(ex => ex.id === exercise.id);
+                                        const selectedItem = selectedExercises.find(ex => ex.id === exercise.id);
+                                        const isSelected = !!selectedItem;
                                         return (
                                             <TouchableOpacity
                                                 key={exercise.id}
@@ -378,6 +397,20 @@ const CreateWorkoutPlan = () => {
                                                     <Text style={styles.exerciseMeta}>
                                                         ⏱️ {exercise.duration}min | 🔥 {exercise.calories_burned}cal
                                                     </Text>
+
+                                                    {isSelected && (
+                                                        <View style={styles.weekdayRow}>
+                                                            {['Thứ 2','Thứ 3','Thứ 4','Thứ 5','Thứ 6','Thứ 7','Chủ nhật'].map((label, idx) => (
+                                                                <Chip
+                                                                    key={label}
+                                                                    style={[styles.weekdayChip, selectedItem.weekday === idx && styles.weekdayChipActive]}
+                                                                    onPress={() => setExerciseWeekday(exercise.id, idx)}
+                                                                >
+                                                                    {label}
+                                                                </Chip>
+                                                            ))}
+                                                        </View>
+                                                    )}
                                                 </View>
                                             </TouchableOpacity>
                                         );
@@ -413,15 +446,45 @@ const styles = StyleSheet.create({
     backIcon: { fontSize: 28, color: '#ffffff', fontWeight: 'bold' },
     headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#ffffff' },
     placeholder: { width: 38 },
+    sectionToggle: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        paddingHorizontal: 15,
+        paddingVertical: 10,
+        gap: 10,
+        backgroundColor: '#f5f5f5',
+    },
+    sectionButton: {
+        flex: 1,
+        paddingVertical: 10,
+        marginHorizontal: 5,
+        borderRadius: 8,
+        backgroundColor: '#ffffff',
+        borderWidth: 1,
+        borderColor: '#e0e0e0',
+        alignItems: 'center',
+    },
+    sectionButtonActive: {
+        backgroundColor: '#fff3e0',
+        borderColor: '#ff9800',
+    },
+    sectionText: {
+        fontSize: 14,
+        color: '#666',
+        fontWeight: '600',
+    },
+    sectionTextActive: {
+        color: '#ff9800',
+    },
     content: { flex: 1 },
     card: { margin: 15, marginBottom: 0, elevation: 2 },
     sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 15 },
     modeButtons: { flexDirection: 'row', gap: 10 },
     modeButton: { flex: 1, padding: 20, borderRadius: 12, backgroundColor: '#f5f5f5', alignItems: 'center', borderWidth: 2, borderColor: '#e0e0e0' },
-    modeButtonActive: { backgroundColor: '#e3f2fd', borderColor: '#3b5998' },
+    modeButtonActive: { backgroundColor: '#fff3e0', borderColor: '#ff9800' },
     modeIcon: { fontSize: 32, marginBottom: 8 },
     modeText: { fontSize: 14, fontWeight: '600', color: '#666' },
-    modeTextActive: { color: '#3b5998' },
+    modeTextActive: { color: '#ff9800' },
     radioItem: { flexDirection: 'row', alignItems: 'center', marginVertical: 5 },
     radioLabel: { fontSize: 15, color: '#333', marginLeft: 8 },
     templateCard: { marginBottom: 15, backgroundColor: '#f8f8f8' },
@@ -435,12 +498,15 @@ const styles = StyleSheet.create({
     countChip: { backgroundColor: '#4caf50' },
     recommendedLabel: { fontSize: 13, color: '#666', marginBottom: 15, fontStyle: 'italic' },
     exerciseList: { gap: 10 },
+    weekdayRow: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 8, gap: 6 },
+    weekdayChip: { backgroundColor: '#e0e0e0', marginRight: 6, marginBottom: 6 },
+    weekdayChipActive: { backgroundColor: '#ff9800', color: '#fff' },
     exerciseItem: { padding: 15, borderRadius: 10, backgroundColor: '#f5f5f5', borderWidth: 2, borderColor: '#e0e0e0' },
-    exerciseItemSelected: { backgroundColor: '#e8f5e9', borderColor: '#4caf50' },
+    exerciseItemSelected: { backgroundColor: '#fff3e0', borderColor: '#ff9800' },
     exerciseInfo: { flex: 1 },
     exerciseName: { fontSize: 15, fontWeight: '600', color: '#333', marginBottom: 5 },
     exerciseMeta: { fontSize: 12, color: '#666' },
-    saveButton: { margin: 20, paddingVertical: 8, backgroundColor: '#4caf50' },
+    saveButton: { margin: 20, paddingVertical: 8, backgroundColor: '#ff9800' },
 });
 
 export default CreateWorkoutPlan;
