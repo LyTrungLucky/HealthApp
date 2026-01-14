@@ -1,5 +1,5 @@
 import { View, Text, FlatList, Image, TouchableOpacity } from "react-native";
-import { Card, ActivityIndicator, Chip } from "react-native-paper";
+import { Card, ActivityIndicator, Chip, Button } from "react-native-paper";
 import { useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -23,6 +23,18 @@ const ClientList = () => {
         finally { setLoading(false); }
     };
 
+    // Expert bắt đầu chat với client
+    const startChat = async (clientId) => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const res = await authApis(token).post(endpoints['start_chat'](clientId));
+            nav.navigate('ChatScreen', { room: res.data });
+        } catch (e) {
+            console.error(e);
+            alert('Không thể bắt đầu chat');
+        }
+    };
+
     if (loading) return <View style={{flex:1,justifyContent:'center',alignItems:'center'}}><ActivityIndicator size="large"/></View>;
 
     return (
@@ -35,9 +47,12 @@ const ClientList = () => {
                 keyExtractor={i => i.id.toString()}
                 contentContainerStyle={{padding:15}}
                 renderItem={({item}) => (
-                    <TouchableOpacity onPress={() => nav.navigate('ClientProgress', { client: item })}>
-                        <Card style={{marginBottom:10}}>
-                            <Card.Content style={{flexDirection:'row',alignItems:'center'}}>
+                    <Card style={{marginBottom:10}}>
+                        <Card.Content>
+                            <TouchableOpacity 
+                                onPress={() => nav.navigate('ClientProgress', { client: item })}
+                                style={{flexDirection:'row',alignItems:'center', marginBottom: 10}}
+                            >
                                 <Image 
                                     source={item.avatar ? {uri: item.avatar} : require('../../assets/icon.png')}
                                     style={{width:60,height:60,borderRadius:30,marginRight:15}}
@@ -48,9 +63,29 @@ const ClientList = () => {
                                     <Text style={{color:'#666'}}>⚖️ {item.weight}kg → {item.target_weight || '?'}kg</Text>
                                 </View>
                                 <Chip compact>{item.bmi} BMI</Chip>
-                            </Card.Content>
-                        </Card>
-                    </TouchableOpacity>
+                            </TouchableOpacity>
+                            
+                            {/* Nút xem tiến độ và chat */}
+                            <View style={{flexDirection:'row', gap: 10}}>
+                                <Button 
+                                    mode="outlined" 
+                                    style={{flex:1}}
+                                    onPress={() => nav.navigate('ClientProgress', { client: item })}
+                                    icon="chart-line"
+                                >
+                                    Tiến độ
+                                </Button>
+                                <Button 
+                                    mode="contained" 
+                                    style={{flex:1, backgroundColor: '#3b5998'}}
+                                    onPress={() => startChat(item.id)}
+                                    icon="chat"
+                                >
+                                    💬 Chat
+                                </Button>
+                            </View>
+                        </Card.Content>
+                    </Card>
                 )}
                 ListEmptyComponent={
                     <View style={{padding:40,alignItems:'center'}}>

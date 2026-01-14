@@ -67,6 +67,11 @@ export const endpoints = {
     'client_progress': (id) => `/progress/client/${id}/`,
     'health_journals': '/journals/',
 
+    'chat_rooms': '/chat-rooms/',
+    'start_chat': (expertId) => `/chat-rooms/start/${expertId}/`,
+    'chat_messages': (roomId) => `/chat-rooms/${roomId}/messages/`,
+    'send_message': (roomId) => `/chat-rooms/${roomId}/send/`,
+
     
 };
 

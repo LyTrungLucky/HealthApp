@@ -50,10 +50,22 @@ const ExpertList = () => {
     };
 
     const getRoleLabel = (role) => {
-        switch(role) {
+        switch (role) {
             case 'nutritionist': return '🥗 Chuyên gia dinh dưỡng';
             case 'trainer': return '💪 Huấn luyện viên';
             default: return role;
+        }
+    };
+
+    // Bắt đầu chat
+    const startChat = async (expertId) => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const res = await authApis(token).post(endpoints['start_chat'](expertId));
+            nav.navigate('ChatScreen', { room: res.data });
+        } catch (e) {
+            console.error(e);
+            alert('Không thể bắt đầu chat');
         }
     };
 
@@ -80,9 +92,24 @@ const ExpertList = () => {
                         )}
                     </View>
                 </View>
-                <Button mode="contained" style={styles.contactButton}>
-                    Tư vấn
-                </Button>
+                
+                {/* Nút Tư vấn và Chat */}
+                <View style={styles.buttonRow}>
+                    <Button 
+                        mode="contained" 
+                        style={[styles.actionButton, { backgroundColor: '#4caf50' }]}
+                        onPress={() => {/* TODO: Tư vấn */}}
+                    >
+                        Tư vấn
+                    </Button>
+                    <Button 
+                        mode="contained" 
+                        style={[styles.actionButton, { backgroundColor: '#3b5998' }]}
+                        onPress={() => startChat(item.id)}
+                    >
+                        💬 Chat
+                    </Button>
+                </View>
             </Card.Content>
         </Card>
     );
@@ -99,11 +126,11 @@ const ExpertList = () => {
         <View style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Chuyên Gia</Text>
-                
+
                 {/* Nút cho Expert xem khách hàng */}
                 {isExpert && (
-                    <Button 
-                        mode="contained" 
+                    <Button
+                        mode="contained"
                         onPress={() => nav.navigate('ClientList')}
                         style={styles.clientsButton}
                         labelStyle={styles.clientsButtonText}
@@ -243,8 +270,12 @@ const styles = StyleSheet.create({
         color: '#666',
         lineHeight: 18,
     },
-    contactButton: {
-        backgroundColor: '#4caf50',
+    buttonRow: {
+        flexDirection: 'row',
+        gap: 10,
+    },
+    actionButton: {
+        flex: 1,
     },
     emptyContainer: {
         padding: 40,

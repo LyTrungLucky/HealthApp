@@ -46,6 +46,9 @@ import JournalList from "./screens/Journal/JournalList";
 import CreateJournal from "./screens/Journal/CreateJournal";
 import JournalDetail from "./screens/Journal/JournalDetail";
 
+import ChatList from "./screens/Chat/ChatList";
+import ChatScreen from "./screens/Chat/ChatScreen";
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -79,6 +82,8 @@ const ProfileStack = () => (
     <Stack.Screen name="Progress" component={Progress} />
     <Stack.Screen name="ReminderList" component={ReminderList} />
     <Stack.Screen name="CreateReminder" component={CreateReminder} />
+    <Stack.Screen name="ChatList" component={ChatList} />
+    <Stack.Screen name="ChatScreen" component={ChatScreen} />
   </Stack.Navigator>
 );
 
@@ -87,6 +92,7 @@ const ExpertStack = () => (
     <Stack.Screen name="ExpertMain" component={ExpertList} />
     <Stack.Screen name="ClientList" component={ClientList} />
     <Stack.Screen name="ClientProgress" component={ClientProgress} />
+    <Stack.Screen name="ChatScreen" component={ChatScreen} />
   </Stack.Navigator>
 );
 
@@ -134,16 +140,6 @@ const MainTabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="Profile"
-        component={ProfileStack}
-        options={{
-          title: "Hồ sơ",
-          tabBarIcon: ({ color }) => (
-            <Icon source="account" color={color} size={24} />
-          ),
-        }}
-      />
-      <Tab.Screen
         name="Journal"
         component={JournalStack}
         options={{
@@ -153,6 +149,17 @@ const MainTabNavigator = () => {
           ),
         }}
       />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileStack}
+        options={{
+          title: "Hồ sơ",
+          tabBarIcon: ({ color }) => (
+            <Icon source="account" color={color} size={24} />
+          ),
+        }}
+      />
+      
     </Tab.Navigator>
   );
 };

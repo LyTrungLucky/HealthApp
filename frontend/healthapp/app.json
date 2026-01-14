@@ -22,7 +22,8 @@
         "usesCleartextTraffic": true
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.healthapp"
+      "package": "com.anonymous.healthapp",
+      "softwareKeyboardLayoutMode": "resize"
     },
     "web": {
       "favicon": "./assets/favicon.png"
