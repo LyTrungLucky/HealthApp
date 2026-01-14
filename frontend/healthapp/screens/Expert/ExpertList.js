@@ -11,7 +11,6 @@ const ExpertList = () => {
     
 
     const [experts, setExperts] = useState([]);
-    const [consultationMap, setConsultationMap] = useState({});
     const [selectedRole, setSelectedRole] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(true);
@@ -25,19 +24,6 @@ const ExpertList = () => {
         { value: "trainer", label: "Huấn luyện viên" }
     ];
 
-    const loadConsultationByExpert = async (expertId) => {
-        try {
-            const token = await AsyncStorage.getItem("token");
-            if (!token) return null;
-
-            const res = await authApis(token).get(
-                `${endpoints["consultations"]}by-expert/${expertId}/`
-            );
-            return res.data;
-        } catch {
-            return null;
-        }
-    };
 
     const loadExperts = async () => {
         try {
@@ -53,13 +39,6 @@ const ExpertList = () => {
                 { params }
             );
             setExperts(res.data);
-
-            const map = {};
-            for (let expert of res.data) {
-                const c = await loadConsultationByExpert(expert.id);
-                if (c) map[expert.id] = c;
-            }
-            setConsultationMap(map);
 
         } catch (err) {
             console.error(err);
@@ -86,88 +65,6 @@ const ExpertList = () => {
         loadExperts();
     };
 
-    const connectExpert = async (expertId) => {
-        try {
-            const token = await AsyncStorage.getItem("token");
-            if (!token) {
-                Alert.alert("Thông báo", "Vui lòng đăng nhập");
-                return;
-            }
-
-            const appointmentDate = new Date(
-                Date.now() + 24 * 60 * 60 * 1000
-            ).toISOString();
-
-            const res = await authApis(token).post(
-                endpoints["consultations"],
-                {
-                    expert: expertId,
-                    appointment_date: appointmentDate
-                }
-            );
-
-            setConsultationMap(prev => ({
-                ...prev,
-                [expertId]: res.data
-            }));
-
-            Alert.alert("Thành công", "Yêu cầu tư vấn đã được gửi");
-
-        } catch (err) {
-            Alert.alert("Lỗi", "Không thể gửi yêu cầu tư vấn");
-        }
-    };
-
-    const renderConsultButton = (expertId) => {
-        const consultation = consultationMap[expertId];
-
-        if (!consultation) {
-            return (
-                <Button
-                    mode="contained"
-                    onPress={() => connectExpert(expertId)}
-                >
-                    Yêu cầu tư vấn
-                </Button>
-            );
-        }
-
-        switch (consultation.status) {
-            case "pending":
-                return (
-                    <Button mode="outlined" disabled>
-                        Chờ xác nhận
-                    </Button>
-                );
-
-            case "confirmed":
-                return (
-                    <Button
-                        mode="contained"
-                        onPress={() =>
-                            nav.navigate("ConsultationRoom", {
-                                consultationId: consultation.id
-                            })
-                        }
-                    >
-                        Bắt đầu tư vấn
-                    </Button>
-                );
-
-            case "cancelled":
-                return (
-                    <Button
-                        mode="contained"
-                        onPress={() => connectExpert(expertId)}
-                    >
-                        Gửi lại yêu cầu
-                    </Button>
-                );
-
-            default:
-                return null;
-        }
-    };
 
     const getRoleLabel = (role) => {
         switch (role) {
@@ -216,13 +113,6 @@ const ExpertList = () => {
                 
                 {/* Nút Tư vấn và Chat */}
                 <View style={styles.buttonRow}>
-                    <Button 
-                        mode="contained" 
-                        style={[styles.actionButton, { backgroundColor: '#4caf50' }]}
-                        onPress={() => {/* TODO: Tư vấn */}}
-                    >
-                        Tư vấn
-                    </Button>
                     <Button 
                         mode="contained" 
                         style={[styles.actionButton, { backgroundColor: '#3b5998' }]}
