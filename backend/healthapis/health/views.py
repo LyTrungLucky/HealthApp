@@ -5,9 +5,9 @@ from django.db.models import Q
 from datetime import date, timedelta
 from .models import (User, HealthProfile, DailyTracking, Exercise, ExerciseCategory,
                      WorkoutPlan, WorkoutSchedule, Food, NutritionPlan, MealSchedule,
-                     Progress, Consultation, Reminder, HealthJournal)
+                     Progress, Consultation, Reminder, HealthJournal, ChatRoom, Message)
 from . import serializers
-from .serializers import UserRegisterSerializer, UserSerializer, WorkoutPlanSerializer, NutritionPlanSerializer, HealthJournalSerializer
+from .serializers import UserRegisterSerializer, UserSerializer, WorkoutPlanSerializer, NutritionPlanSerializer, HealthJournalSerializer, MessageSerializer, ChatRoomSerializer
 
 
 # Authentication Views
@@ -677,5 +677,78 @@ class HealthJournalViewSet(viewsets.ModelViewSet):
             date__month=month
         )
         return Response(HealthJournalSerializer(journals, many=True).data)
+
+
+class ChatRoomViewSet(viewsets.ModelViewSet):
+    serializer_class = ChatRoomSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return ChatRoom.objects.filter(user=user) | ChatRoom.objects.filter(expert=user)
+
+    def get_serializer_context(self):
+        return {'request': self.request}
+
+    @action(methods=['post'], detail=False, url_path='start/(?P<other_user_id>\d+)')
+    def start_chat(self, request, other_user_id):
+        """Bắt đầu hoặc mở chat - hỗ trợ cả user và expert"""
+        current_user = request.user
+
+        try:
+            other_user = User.objects.get(id=other_user_id)
+        except User.DoesNotExist:
+            return Response({"detail": "Không tìm thấy người dùng"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Xác định ai là user, ai là expert
+        if current_user.role in ['nutritionist', 'trainer']:
+            # Current user là expert, other_user là client
+            user = other_user
+            expert = current_user
+        else:
+            # Current user là user thường, other_user phải là expert
+            if other_user.role not in ['nutritionist', 'trainer']:
+                return Response({"detail": "Không tìm thấy chuyên gia"}, status=status.HTTP_404_NOT_FOUND)
+            user = current_user
+            expert = other_user
+
+        chat_room, created = ChatRoom.objects.get_or_create(
+            user=user,
+            expert=expert
+        )
+        return Response(ChatRoomSerializer(chat_room, context={'request': request}).data)
+
+    @action(methods=['get'], detail=True, url_path='messages')
+    def get_messages(self, request, pk=None):
+        """Lấy tin nhắn trong phòng chat"""
+        chat_room = self.get_object()
+        messages = chat_room.messages.all()
+
+        # Đánh dấu đã đọc tin nhắn của người khác
+        messages.filter(is_read=False).exclude(sender=request.user).update(is_read=True)
+
+        return Response(MessageSerializer(messages, many=True, context={'request': request}).data)
+
+    @action(methods=['post'], detail=True, url_path='send')
+    def send_message(self, request, pk=None):
+        """Gửi tin nhắn"""
+        chat_room = self.get_object()
+        content = request.data.get('content', '').strip()
+
+        if not content:
+            return Response({"detail": "Nội dung không được trống"}, status=status.HTTP_400_BAD_REQUEST)
+
+        message = Message.objects.create(
+            chat_room=chat_room,
+            sender=request.user,
+            content=content
+        )
+
+        # Cập nhật last_message
+        chat_room.last_message = content[:100]
+        chat_room.last_message_time = message.created_date
+        chat_room.save()
+
+        return Response(MessageSerializer(message, context={'request': request}).data)
 
 

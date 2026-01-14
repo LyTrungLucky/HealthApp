@@ -280,3 +280,36 @@ class HealthJournal(BaseModel):
 
     def __str__(self):
         return f"{self.user.username} - {self.date} - {self.title}"
+
+
+class ChatRoom(BaseModel):
+    """Phòng chat giữa user và expert"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chat_rooms')
+    expert = models.ForeignKey(User, on_delete=models.CASCADE, related_name='expert_chat_rooms',
+                               limit_choices_to={'role__in': ['nutritionist', 'trainer']})
+    last_message = models.TextField(null=True, blank=True)
+    last_message_time = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('user', 'expert')
+        ordering = ['-last_message_time']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.expert.username}"
+
+
+class Message(BaseModel):
+    """Tin nhắn trong phòng chat"""
+    chat_room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name='messages')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['created_date']
+
+    def __str__(self):
+        return f"{self.sender.username}: {self.content[:50]}"
+
+
+

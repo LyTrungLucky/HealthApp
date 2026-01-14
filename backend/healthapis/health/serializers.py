@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import (User, HealthProfile, DailyTracking, Exercise, ExerciseCategory,
                      WorkoutPlan, WorkoutSchedule, Food, NutritionPlan, MealSchedule,
-                     Progress, Consultation, Reminder, HealthJournal)
+                     Progress, Consultation, Reminder, HealthJournal, ChatRoom, Message)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -289,3 +289,47 @@ class HealthJournalSerializer(serializers.ModelSerializer):
                   'workout_completed', 'workout_notes', 'energy_level',
                   'sleep_hours', 'image', 'created_date']
         read_only_fields = ['id', 'created_date']
+
+
+class MessageSerializer(serializers.ModelSerializer):
+    sender_name = serializers.SerializerMethodField()
+    sender_avatar = serializers.SerializerMethodField()
+    is_mine = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Message
+        fields = ['id', 'content', 'sender', 'sender_name', 'sender_avatar',
+                  'is_mine', 'is_read', 'created_date']
+
+    def get_sender_name(self, obj):
+        return f"{obj.sender.first_name} {obj.sender.last_name}".strip() or obj.sender.username
+
+    def get_sender_avatar(self, obj):
+        return obj.sender.avatar.url if obj.sender.avatar else None
+
+    def get_is_mine(self, obj):
+        request = self.context.get('request')
+        return obj.sender == request.user if request else False
+
+
+class ChatRoomSerializer(serializers.ModelSerializer):
+    other_user = serializers.SerializerMethodField()
+    unread_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ChatRoom
+        fields = ['id', 'other_user', 'last_message', 'last_message_time', 'unread_count']
+
+    def get_other_user(self, obj):
+        request = self.context.get('request')
+        other = obj.expert if obj.user == request.user else obj.user
+        return {
+            'id': other.id,
+            'name': f"{other.first_name} {other.last_name}".strip() or other.username,
+            'avatar': other.avatar.url if other.avatar else None,
+            'role': other.get_role_display()
+        }
+
+    def get_unread_count(self, obj):
+        request = self.context.get('request')
+        return obj.messages.filter(is_read=False).exclude(sender=request.user).count()

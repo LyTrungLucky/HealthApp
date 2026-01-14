@@ -18,6 +18,7 @@ router.register('progress', views.ProgressViewSet, basename='progress')
 router.register('consultations', views.ConsultationViewSet, basename='consultation')
 router.register('reminders', views.ReminderViewSet, basename='reminder')
 router.register('journals', views.HealthJournalViewSet, basename='journal')
+router.register('chat-rooms', views.ChatRoomViewSet, basename='chatroom')
 
 urlpatterns = [
     path('', include(router.urls)),
