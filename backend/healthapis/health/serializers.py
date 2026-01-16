@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import (User, HealthProfile, DailyTracking, Exercise, ExerciseCategory,
                      WorkoutPlan, WorkoutSchedule, Food, NutritionPlan, MealSchedule,
                      Progress, Consultation, Reminder, HealthJournal, ChatRoom, Message)
+from cloudinary.utils import cloudinary_url
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -80,23 +81,69 @@ class DailyTrackingSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+
 class ExerciseCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ExerciseCategory
         fields = '__all__'
 
-
 class ExerciseSerializer(serializers.ModelSerializer):
     category = ExerciseCategorySerializer(read_only=True)
     category_id = serializers.IntegerField(write_only=True)
+    image_url = serializers.SerializerMethodField()
+    video_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Exercise
-        fields = '__all__'
+        fields = '__all__'  # SerializerMethodField sẽ được thêm tự động
 
+    def _build_cloudinary_url(self, public_id):
+        if not public_id:
+            return None
+        try:
+            from cloudinary.utils import cloudinary_url
+            url, _ = cloudinary_url(public_id)
+            return url
+        except Exception:
+            return None
+
+    def _get_field_url(self, obj, field_name):
+        val = getattr(obj, field_name, None)
+        if not val:
+            return None
+        request = self.context.get('request')
+        if hasattr(val, 'url'):
+            try:
+                return request.build_absolute_uri(val.url) if request else val.url
+            except Exception:
+                pass
+        if isinstance(val, str) and val.strip():
+            s = val.strip()
+            if s.startswith('http://') or s.startswith('https://'):
+                return s
+            return self._build_cloudinary_url(s)
+        if isinstance(val, dict):
+            if val.get('url'):
+                return val.get('url')
+            public_id = val.get('public_id') or val.get('publicId') or val.get('id')
+            return self._build_cloudinary_url(public_id)
+        if hasattr(val, 'file') and hasattr(val.file, 'url'):
+            try:
+                return request.build_absolute_uri(val.file.url) if request else val.file.url
+            except Exception:
+                pass
+        return None
+
+    def get_image_url(self, obj):
+        return self._get_field_url(obj, 'image')
+
+    def get_video_url(self, obj):
+        return self._get_field_url(obj, 'video')
 
 class ExerciseDetailSerializer(serializers.ModelSerializer):
     category = ExerciseCategorySerializer(read_only=True)
+    image_url = serializers.SerializerMethodField()
+    video_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Exercise
@@ -105,7 +152,8 @@ class ExerciseDetailSerializer(serializers.ModelSerializer):
             'name',
             'description',
             'instructions',
-            'image',
+            'image',      # keep raw if you need
+            'image_url',  # absolute URL for frontend
             'video_url',
             'duration',
             'calories_burned',
@@ -113,6 +161,52 @@ class ExerciseDetailSerializer(serializers.ModelSerializer):
             'category'
         ]
 
+    def _build_cloudinary_url(self, public_id):
+        if not public_id:
+            return None
+        try:
+            url, _ = cloudinary_url(public_id)
+            return url
+        except Exception:
+            return None
+
+    def _get_field_url(self, obj, field_name):
+        val = getattr(obj, field_name, None)
+        if not val:
+            return None
+        request = self.context.get('request')
+        # If FieldFile or has .url
+        if hasattr(val, 'url'):
+            try:
+                return request.build_absolute_uri(val.url) if request else val.url
+            except Exception:
+                pass
+        # Plain string (could be full URL or cloudinary public id / path)
+        if isinstance(val, str) and val.strip():
+            s = val.strip()
+            if s.startswith('http://') or s.startswith('https://'):
+                return s
+            # If looks like cloudinary public id or path, build URL
+            return self._build_cloudinary_url(s)
+        # dict-like from some storages
+        if isinstance(val, dict):
+            if val.get('url'):
+                return val.get('url')
+            public_id = val.get('public_id') or val.get('publicId') or val.get('id')
+            return self._build_cloudinary_url(public_id)
+        # nested file object
+        if hasattr(val, 'file') and hasattr(val.file, 'url'):
+            try:
+                return request.build_absolute_uri(val.file.url) if request else val.file.url
+            except Exception:
+                pass
+        return None
+
+    def get_image_url(self, obj):
+        return self._get_field_url(obj, 'image')
+
+    def get_video_url(self, obj):
+        return self._get_field_url(obj, 'video')
 
 class WorkoutScheduleSerializer(serializers.ModelSerializer):
     exercise = ExerciseSerializer(read_only=True)

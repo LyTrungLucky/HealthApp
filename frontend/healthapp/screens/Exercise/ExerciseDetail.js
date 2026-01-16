@@ -1,10 +1,11 @@
-
+// screens/Exercise/ExerciseDetail.js
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Linking, Alert } from "react-native";
 import { Button, ActivityIndicator, Chip, Portal, Dialog, RadioButton, TextInput } from "react-native-paper";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { Video } from 'expo-av';
 import { useNavigation, useRoute } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { authApis, endpoints } from "../../utils/Apis";
+import { authApis, endpoints, BASE_URL } from "../../utils/Apis";
 
 const ExerciseDetail = () => {
     const [exercise, setExercise] = useState(null);
@@ -25,7 +26,7 @@ const ExerciseDetail = () => {
     }, []);
 
     useEffect(() => {
-       
+        // load user's workout plans for quick add
         loadPlans();
     }, []);
 
@@ -58,10 +59,61 @@ const ExerciseDetail = () => {
         }
     };
 
-    const openVideo = () => {
-        if (exercise?.video_url) {
-            Linking.openURL(exercise.video_url);
+    const getVideoUrl = () => {
+        if (!exercise) return null;
+        // Support multiple backend shapes:
+        // - exercise.video as string (direct URL)
+        // - exercise.video as object with { url } or { file }
+        // - legacy exercise.video_url string
+        if (exercise.video) {
+            if (typeof exercise.video === 'string' && exercise.video.trim() !== '') return exercise.video;
+            if (typeof exercise.video === 'object') {
+                if (exercise.video.url) return exercise.video.url;
+                if (exercise.video.file) return exercise.video.file;
+            }
         }
+        if (exercise.video_url) return exercise.video_url;
+        return null;
+    };
+
+    const openVideo = () => {
+        const url = getVideoUrl();
+        if (url) {
+            Linking.openURL(url);
+        } else {
+            Alert.alert('Không có video', 'Bài tập này chưa có video hướng dẫn');
+        }
+    };
+
+    const videoRef = useRef(null);
+
+    const getImageUri = () => {
+        if (!exercise) return null;
+        // handle several shapes: string, object with .url/secure_url, nested file, or separate image_url
+        const imgCandidates = [];
+        if (exercise.image_url) imgCandidates.push(exercise.image_url);
+        if (exercise.image) {
+            if (typeof exercise.image === 'string' && exercise.image.trim() !== '') imgCandidates.push(exercise.image);
+            if (typeof exercise.image === 'object') {
+                if (exercise.image.url) imgCandidates.push(exercise.image.url);
+                if (exercise.image.secure_url) imgCandidates.push(exercise.image.secure_url);
+                if (exercise.image.file && exercise.image.file.url) imgCandidates.push(exercise.image.file.url);
+            }
+        }
+
+        for (const candidate of imgCandidates) {
+            if (!candidate) continue;
+            const s = String(candidate).trim();
+            if (s === '') continue;
+            // absolute URL
+            if (s.startsWith('http://') || s.startsWith('https://')) return s;
+            // relative path starting with / -> prefix BASE_URL
+            if (s.startsWith('/')) return BASE_URL.replace(/\/$/, '') + s;
+            // relative path without leading slash (Cloudinary sometimes returns "image/upload/...")
+            return BASE_URL.replace(/\/$/, '') + '/' + s;
+        }
+
+        return null;
     };
 
     const getDifficultyColor = (difficulty) => {
@@ -153,7 +205,7 @@ const ExerciseDetail = () => {
 
     return (
         <View style={styles.container}>
-           
+            {/* Header with Back Button */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => nav.goBack()} style={styles.backButton}>
                     <Text style={styles.backIcon}>←</Text>
@@ -163,19 +215,19 @@ const ExerciseDetail = () => {
             </View>
 
             <ScrollView style={styles.content}>
-               
+                {/* Image */}
                 <Image 
-                    source={exercise.image ? { uri: exercise.image } : require('../../assets/icon.png')}
+                    source={getImageUri() ? { uri: getImageUri() } : require('../../assets/icon.png')}
                     style={styles.image}
                 />
 
-               
+                {/* Title & Category */}
                 <View style={styles.titleSection}>
                     <Text style={styles.title}>{exercise.name}</Text>
                     <Chip style={styles.categoryChip}>{exercise.category?.name || 'N/A'}</Chip>
                 </View>
 
-                
+                {/* Stats */}
                 <View style={styles.statsContainer}>
                     <View style={styles.statBox}>
                         <Text style={styles.statIcon}>⏱️</Text>
@@ -195,30 +247,39 @@ const ExerciseDetail = () => {
                     </View>
                 </View>
 
-                
+                {/* Description */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Mô tả</Text>
                     <Text style={styles.description}>{exercise.description}</Text>
                 </View>
 
+                {/* Instructions */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Hướng dẫn thực hiện</Text>
                     <Text style={styles.instructions}>{exercise.instructions}</Text>
                 </View>
 
-                
-                {exercise.video_url && (
-                    <Button 
-                        mode="contained" 
-                        icon="play-circle"
-                        onPress={openVideo}
-                        style={styles.videoButton}
-                    >
-                        Xem video hướng dẫn
-                    </Button>
+                {/* Video (inline) */}
+                {getVideoUrl() ? (
+                    <View style={styles.videoContainer}>
+                        <Video
+                            ref={videoRef}
+                            source={{ uri: getVideoUrl() }}
+                            useNativeControls
+                            resizeMode="contain"
+                            style={styles.video}
+                        />
+                        <Button mode="outlined" icon="open-in-new" onPress={openVideo} style={styles.openExternButton}>
+                            Mở ngoài
+                        </Button>
+                    </View>
+                ) : (
+                    <View style={{ paddingHorizontal: 20, paddingTop: 10 }}>
+                        <Text style={styles.noVideoText}>Không có video hướng dẫn</Text>
+                    </View>
                 )}
 
-                
+                {/* Add to Plan Button */}
                 <Button 
                     mode="outlined" 
                     icon="calendar-plus"
@@ -384,6 +445,24 @@ const styles = StyleSheet.create({
         margin: 20,
         marginBottom: 10,
         backgroundColor: '#f44336',
+    },
+    noVideoText: {
+        fontSize: 14,
+        color: '#999',
+    },
+    videoContainer: {
+        backgroundColor: '#ffffff',
+        marginTop: 10,
+        padding: 10,
+    },
+    video: {
+        width: '100%',
+        height: 250,
+        backgroundColor: '#000'
+    },
+    openExternButton: {
+        marginTop: 10,
+        alignSelf: 'flex-end'
     },
     addButton: {
         margin: 20,

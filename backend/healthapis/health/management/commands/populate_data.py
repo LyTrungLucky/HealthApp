@@ -104,7 +104,6 @@ class Command(BaseCommand):
                 'difficulty': 'easy',
                 'duration': 30,
                 'calories_burned': 300,
-                'video_url': 'https://www.youtube.com/watch?v=example1',
                 'instructions': '1. Khởi động 5 phút\n2. Chạy đều 20 phút\n3. Hạ nhịp 5 phút'
             },
             {
@@ -114,7 +113,6 @@ class Command(BaseCommand):
                 'difficulty': 'easy',
                 'duration': 45,
                 'calories_burned': 400,
-                'video_url': 'https://www.youtube.com/watch?v=example2',
                 'instructions': '1. Khởi động 5 phút\n2. Đạp đều 35 phút\n3. Hạ nhịp 5 phút'
             },
             {
@@ -124,7 +122,6 @@ class Command(BaseCommand):
                 'difficulty': 'medium',
                 'duration': 20,
                 'calories_burned': 250,
-                'video_url': 'https://www.youtube.com/watch?v=example3',
                 'instructions': '1. Khởi động cổ chân\n2. Nhảy 30 giây, nghỉ 10 giây\n3. Lặp lại 20 phút'
             },
 
@@ -136,7 +133,6 @@ class Command(BaseCommand):
                 'difficulty': 'medium',
                 'duration': 15,
                 'calories_burned': 100,
-                'video_url': 'https://www.youtube.com/watch?v=example4',
                 'instructions': '1. Nằm sấp, đặt tay rộng bằng vai\n2. Đẩy người lên xuống\n3. 3 sets x 15 reps'
             },
             {
@@ -146,7 +142,6 @@ class Command(BaseCommand):
                 'difficulty': 'medium',
                 'duration': 20,
                 'calories_burned': 150,
-                'video_url': 'https://www.youtube.com/watch?v=example5',
                 'instructions': '1. Đứng thẳng, chân rộng bằng vai\n2. Hạ người xuống như ngồi ghế\n3. 3 sets x 20 reps'
             },
             {
@@ -156,7 +151,6 @@ class Command(BaseCommand):
                 'difficulty': 'easy',
                 'duration': 10,
                 'calories_burned': 50,
-                'video_url': 'https://www.youtube.com/watch?v=example6',
                 'instructions': '1. Chống tay hoặc khuỷu tay\n2. Giữ thẳng người\n3. Giữ 60 giây x 3 sets'
             },
             {
@@ -166,7 +160,6 @@ class Command(BaseCommand):
                 'difficulty': 'medium',
                 'duration': 15,
                 'calories_burned': 120,
-                'video_url': 'https://www.youtube.com/watch?v=example7',
                 'instructions': '1. Bước chân về phía trước\n2. Hạ người xuống\n3. 3 sets x 12 reps mỗi chân'
             },
 
@@ -178,7 +171,6 @@ class Command(BaseCommand):
                 'difficulty': 'hard',
                 'duration': 15,
                 'calories_burned': 200,
-                'video_url': 'https://www.youtube.com/watch?v=example8',
                 'instructions': '1. Đứng thẳng\n2. Hạ xuống chống đẩy\n3. Nhảy lên cao\n4. 3 sets x 10 reps'
             },
             {
@@ -188,7 +180,6 @@ class Command(BaseCommand):
                 'difficulty': 'hard',
                 'duration': 10,
                 'calories_burned': 150,
-                'video_url': 'https://www.youtube.com/watch?v=example9',
                 'instructions': '1. Tư thế chống đẩy\n2. Kéo chân lên ngực xen kẽ\n3. 30 giây x 4 sets'
             },
 
@@ -200,7 +191,6 @@ class Command(BaseCommand):
                 'difficulty': 'easy',
                 'duration': 20,
                 'calories_burned': 80,
-                'video_url': 'https://www.youtube.com/watch?v=example10',
                 'instructions': '1. 12 động tác liên tiếp\n2. Thở đều\n3. Lặp lại 5 lần'
             },
             {
@@ -210,7 +200,6 @@ class Command(BaseCommand):
                 'difficulty': 'medium',
                 'duration': 15,
                 'calories_burned': 60,
-                'video_url': 'https://www.youtube.com/watch?v=example11',
                 'instructions': '1. Duỗi thẳng tay\n2. Chân trước gập 90 độ\n3. Giữ 30 giây mỗi bên'
             },
         ]

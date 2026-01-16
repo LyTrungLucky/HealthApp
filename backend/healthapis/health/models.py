@@ -94,7 +94,12 @@ class Exercise(BaseModel):
     duration = models.IntegerField(help_text="Thời gian (phút)")
     calories_burned = models.IntegerField(help_text="Calories tiêu hao")
     image = CloudinaryField(null=True, blank=True)
-    video_url = models.URLField(null=True, blank=True, help_text="Link video YouTube/Vimeo")
+    video = CloudinaryField(
+        'video',
+        resource_type='video',
+        blank=True,
+        null=True
+    )
     instructions = models.TextField(help_text="Hướng dẫn thực hiện")
 
     def __str__(self):

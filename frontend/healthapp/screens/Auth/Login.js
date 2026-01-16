@@ -40,8 +40,8 @@ const Login = ({ route }) => {
         form.append("grant_type", "password");
         form.append("username", user.username);
         form.append("password", user.password);
-        form.append("client_id", "P6co9CAdVgKGzuCPwBj1MrCuZaHz0AUlOERlCl4I");
-        form.append("client_secret", "EXGduAhPZrAYgAQ3iRwNkRMBlVi9ZcT4skn56YZBcpEXTxmidhU2U0iZQbgTRIvdXK1XavuO7Uf4J8iJo3r2QeJSX1Gayw8fnz9dKE2z6nCA0tO9hzoXbEXtZIyKlous");
+        form.append("client_id", "vMi6KUJEEMw5Onn0J1aZf9dk8VJKZ9Gv4xwXjLi0");
+        form.append("client_secret", "Oq0MHQpkK3cfhnP8Pos0dkT6HVyYVrI7KuR6SpPyiT9RXUWE1Mhndnn1sYvsmMHNBsQiAQI8OFCy8Gry4z0pL1Ve1uUtkJFuskGzCBaewaAlv2dVDcs1PzRViKbtknux");
 
         const res = await Apis.post(
             endpoints.login,

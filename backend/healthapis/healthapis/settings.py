@@ -99,7 +99,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'healthdb',
         'USER': 'root',
-        'PASSWORD': 'Admin@123',  # Đổi thành password MySQL của bạn
+        'PASSWORD': 'aiconcha123',
         'HOST': ''  # mặc định localhost
     }
 }
@@ -151,5 +151,5 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CLIENI_ID = 'P6co9CAdVgKGzuCPwBj1MrCuZaHz0AUlOERlCl4I'
-CLIENT_SECRET = 'EXGduAhPZrAYgAQ3iRwNkRMBlVi9ZcT4skn56YZBcpEXTxmidhU2U0iZQbgTRIvdXK1XavuO7Uf4J8iJo3r2QeJSX1Gayw8fnz9dKE2z6nCA0tO9hzoXbEXtZIyKlous'
+CLIENI_ID = 'vMi6KUJEEMw5Onn0J1aZf9dk8VJKZ9Gv4xwXjLi0'
+CLIENT_SECRET = 'Oq0MHQpkK3cfhnP8Pos0dkT6HVyYVrI7KuR6SpPyiT9RXUWE1Mhndnn1sYvsmMHNBsQiAQI8OFCy8Gry4z0pL1Ve1uUtkJFuskGzCBaewaAlv2dVDcs1PzRViKbtknux'

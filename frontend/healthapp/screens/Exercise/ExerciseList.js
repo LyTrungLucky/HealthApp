@@ -1,10 +1,9 @@
-
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, RefreshControl } from "react-native";
 import { Searchbar, Card, Chip, ActivityIndicator } from "react-native-paper";
 import { useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { authApis, endpoints } from "../../utils/Apis";
+import { authApis, endpoints, BASE_URL } from "../../utils/Apis";
 
 const ExerciseList = () => {
     const [exercises, setExercises] = useState([]);
@@ -19,11 +18,11 @@ const ExerciseList = () => {
         try {
             const token = await AsyncStorage.getItem('token');
             if (token) {
-                
+                // Load categories
                 const catRes = await authApis(token).get(endpoints['exercise_categories']);
                 setCategories(catRes.data);
 
-               
+                // Load exercises
                 let params = {};
                 if (selectedCategory) params.category_id = selectedCategory;
                 if (searchQuery) params.search = searchQuery;
@@ -66,13 +65,38 @@ const ExerciseList = () => {
         }
     };
 
+    const getImageUri = (item) => {
+        if (!item) return null;
+        const imgCandidates = [];
+        if (item.image_url) imgCandidates.push(item.image_url);
+        if (item.image) {
+            if (typeof item.image === 'string' && item.image.trim() !== '') imgCandidates.push(item.image);
+            if (typeof item.image === 'object') {
+                if (item.image.url) imgCandidates.push(item.image.url);
+                if (item.image.secure_url) imgCandidates.push(item.image.secure_url);
+                if (item.image.file && item.image.file.url) imgCandidates.push(item.image.file.url);
+            }
+        }
+
+        for (const candidate of imgCandidates) {
+            if (!candidate) continue;
+            const s = String(candidate).trim();
+            if (s === '') continue;
+            if (s.startsWith('http://') || s.startsWith('https://')) return s;
+            if (s.startsWith('/')) return BASE_URL.replace(/\/$/, '') + s;
+
+            return BASE_URL.replace(/\/$/, '') + '/' + s;
+        }
+        return null;
+    };
+
     const renderExercise = ({ item }) => (
         <TouchableOpacity 
             style={styles.exerciseCard}
             onPress={() => nav.navigate('ExerciseDetail', { exerciseId: item.id })}
         >
             <Image 
-                source={item.image ? { uri: item.image } : require('../../assets/icon.png')}
+                source={getImageUri(item) ? { uri: getImageUri(item) } : require('../../assets/icon.png')}
                 style={styles.exerciseImage}
             />
             <View style={styles.exerciseInfo}>
@@ -106,12 +130,12 @@ const ExerciseList = () => {
 
     return (
         <View style={styles.container}>
-         
+            {/* Header */}
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Bài Tập</Text>
             </View>
 
-           
+            {/* Search */}
             <View style={styles.searchContainer}>
                 <Searchbar
                     placeholder="Tìm bài tập..."
@@ -121,7 +145,7 @@ const ExerciseList = () => {
                 />
             </View>
 
-            
+            {/* Categories */}
             <View style={styles.categoriesContainer}>
                 <FlatList
                     horizontal
@@ -141,7 +165,7 @@ const ExerciseList = () => {
                 />
             </View>
 
-            
+           
             <FlatList
                 data={exercises}
                 renderItem={renderExercise}
@@ -267,6 +291,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#999',
     },
+    
 });
 
 export default ExerciseList;
