@@ -1,9 +1,10 @@
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, RefreshControl } from "react-native";
 import { FAB, Card, Switch, ActivityIndicator } from "react-native-paper";
 import { useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { authApis, endpoints } from "../../utils/Apis";
+import styles from "../../styles/screens/Reminder/ReminderListStyles";
 
 const ReminderList = () => {
     const [reminders, setReminders] = useState([]);
@@ -119,26 +120,5 @@ const ReminderList = () => {
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f5f5f5' },
-    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    header: { backgroundColor: '#3b5998', padding: 20, paddingTop: 50 },
-    headerTitle: { fontSize: 24, fontWeight: 'bold', color: '#ffffff' },
-    listContainer: { padding: 15 },
-    card: { marginBottom: 10 },
-    cardContent: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    leftSection: { flexDirection: 'row', alignItems: 'center', flex: 1 },
-    icon: { fontSize: 32, marginRight: 15 },
-    info: { flex: 1 },
-    title: { fontSize: 16, fontWeight: 'bold', color: '#333' },
-    time: { fontSize: 24, fontWeight: 'bold', color: '#3b5998', marginVertical: 5 },
-    days: { fontSize: 12, color: '#666' },
-    emptyContainer: { padding: 40, alignItems: 'center' },
-    emptyIcon: { fontSize: 64, marginBottom: 15 },
-    emptyText: { fontSize: 18, fontWeight: 'bold', color: '#666', marginBottom: 8 },
-    emptySubtext: { fontSize: 14, color: '#999', textAlign: 'center' },
-    fab: { position: 'absolute', margin: 16, right: 0, bottom: 0, backgroundColor: '#3b5998' },
-});
 
 export default ReminderList;

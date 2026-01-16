@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { authApis, endpoints } from "../../utils/Apis";
+import styles from "../../styles/screens/Expert/ClientListStyles";
 
 const ClientList = () => {
     const [clients, setClients] = useState([]);
@@ -19,11 +20,13 @@ const ClientList = () => {
             const token = await AsyncStorage.getItem('token');
             const res = await authApis(token).get(endpoints['my_clients']);
             setClients(res.data);
-        } catch (e) { console.error(e); }
-        finally { setLoading(false); }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    
     const startChat = async (clientId) => {
         try {
             const token = await AsyncStorage.getItem('token');
@@ -35,49 +38,57 @@ const ClientList = () => {
         }
     };
 
-    if (loading) return <View style={{flex:1,justifyContent:'center',alignItems:'center'}}><ActivityIndicator size="large"/></View>;
+    if (loading) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large"/>
+            </View>
+        );
+    }
 
     return (
-        <View style={{flex:1,backgroundColor:'#f5f5f5'}}>
-            <View style={{backgroundColor:'#3b5998',padding:20,paddingTop:50}}>
-                <Text style={{fontSize:24,fontWeight:'bold',color:'#fff'}}>👥 Khách hàng của tôi</Text>
+        <View style={styles.container}>
+            <View style={styles.header}>
+                <Text style={styles.headerTitle}>👥 Khách hàng của tôi</Text>
             </View>
+
             <FlatList
                 data={clients}
                 keyExtractor={i => i.id.toString()}
-                contentContainerStyle={{padding:15}}
+                contentContainerStyle={styles.listContainer}
                 renderItem={({item}) => (
-                    <Card style={{marginBottom:10}}>
+                    <Card style={styles.clientCard}>
                         <Card.Content>
-                            <TouchableOpacity 
+                            <TouchableOpacity
                                 onPress={() => nav.navigate('ClientProgress', { client: item })}
-                                style={{flexDirection:'row',alignItems:'center', marginBottom: 10}}
+                                style={styles.clientHeader}
                             >
-                                <Image 
+                                <Image
                                     source={item.avatar ? {uri: item.avatar} : require('../../assets/icon.png')}
-                                    style={{width:60,height:60,borderRadius:30,marginRight:15}}
+                                    style={styles.avatar}
                                 />
-                                <View style={{flex:1}}>
-                                    <Text style={{fontSize:16,fontWeight:'bold'}}>{item.name}</Text>
-                                    <Text style={{color:'#666'}}>🎯 {item.goal}</Text>
-                                    <Text style={{color:'#666'}}>⚖️ {item.weight}kg → {item.target_weight || '?'}kg</Text>
+                                <View style={styles.clientInfo}>
+                                    <Text style={styles.clientName}>{item.name}</Text>
+                                    <Text style={styles.clientGoal}>🎯 {item.goal}</Text>
+                                    <Text style={styles.clientWeight}>
+                                        ⚖️ {item.weight}kg → {item.target_weight || '?'}kg
+                                    </Text>
                                 </View>
                                 <Chip compact>{item.bmi} BMI</Chip>
                             </TouchableOpacity>
-                            
-                           
-                            <View style={{flexDirection:'row', gap: 10}}>
-                                <Button 
-                                    mode="outlined" 
-                                    style={{flex:1}}
+
+                            <View style={styles.buttonRow}>
+                                <Button
+                                    mode="outlined"
+                                    style={styles.progressButton}
                                     onPress={() => nav.navigate('ClientProgress', { client: item })}
                                     icon="chart-line"
                                 >
                                     Tiến độ
                                 </Button>
-                                <Button 
-                                    mode="contained" 
-                                    style={{flex:1, backgroundColor: '#3b5998'}}
+                                <Button
+                                    mode="contained"
+                                    style={styles.chatButton}
                                     onPress={() => startChat(item.id)}
                                     icon="chat"
                                 >
@@ -88,9 +99,9 @@ const ClientList = () => {
                     </Card>
                 )}
                 ListEmptyComponent={
-                    <View style={{padding:40,alignItems:'center'}}>
-                        <Text style={{fontSize:48}}>👥</Text>
-                        <Text>Chưa có khách hàng nào</Text>
+                    <View style={styles.emptyContainer}>
+                        <Text style={styles.emptyIcon}>👥</Text>
+                        <Text style={styles.emptyText}>Chưa có khách hàng nào</Text>
                     </View>
                 }
             />

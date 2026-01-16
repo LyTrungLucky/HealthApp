@@ -1,10 +1,11 @@
-import { ScrollView, Text, View, StyleSheet, TouchableOpacity } from "react-native";
+import { ScrollView, Text, View, TouchableOpacity } from "react-native";
 import { useContext, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Button, HelperText, TextInput } from "react-native-paper";
 import Apis, { authApis, endpoints } from "../../utils/Apis";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MyUserContext } from "../../utils/contexts/MyContext";
+import styles from "../../styles/screens/Auth/LoginStyles";
 
 const Login = ({ route }) => {
     const nav = useNavigation();
@@ -40,8 +41,8 @@ const Login = ({ route }) => {
         form.append("grant_type", "password");
         form.append("username", user.username);
         form.append("password", user.password);
-        form.append("client_id", "vMi6KUJEEMw5Onn0J1aZf9dk8VJKZ9Gv4xwXjLi0");
-        form.append("client_secret", "Oq0MHQpkK3cfhnP8Pos0dkT6HVyYVrI7KuR6SpPyiT9RXUWE1Mhndnn1sYvsmMHNBsQiAQI8OFCy8Gry4z0pL1Ve1uUtkJFuskGzCBaewaAlv2dVDcs1PzRViKbtknux");
+        form.append("client_id", "XrCIHBbOBZrjrxOTgbxjFaous1ntygOObuYI47YR");
+        form.append("client_secret", "NFiEODhcVx3h0JSFTd5yJZtDQ4ZfzXd1egLFIplZDKEJfrGVbE4tpKh9OQ6R7kmosmJO9GONn48AjGBoSKNuorF7GI6RGtUDtYgQwUddNiSR2HfaNRLkFFrL8ti2pxLA");
 
         const res = await Apis.post(
             endpoints.login,
@@ -74,14 +75,14 @@ const Login = ({ route }) => {
 
     
     return (
-        <View style={styles.container}>
-            <ScrollView contentContainerStyle={styles.scrollContent}>
-                <View style={styles.header}>
-                    <Text style={styles.title}>ĐĂNG NHẬP</Text>
-                    <Text style={styles.subtitle}>Chào mừng bạn trở lại!</Text>
+        <View style={styles.loginContainer}>
+            <ScrollView contentContainerStyle={styles.loginScrollContent}>
+                <View style={styles.loginHeader}>
+                    <Text style={styles.loginTitle}>ĐĂNG NHẬP</Text>
+                    <Text style={styles.loginSubtitle}>Chào mừng bạn trở lại!</Text>
                 </View>
 
-                <View style={styles.formContainer}>
+                <View style={styles.loginFormContainer}>
                     <HelperText type="error" visible={!!err}>
                         {err}
                     </HelperText>
@@ -90,7 +91,7 @@ const Login = ({ route }) => {
                         label="Tên đăng nhập"
                         value={user.username}
                         onChangeText={(t) => setUser({ ...user, username: t })}
-                        style={styles.input}
+                        style={styles.loginInput}
                         left={<TextInput.Icon icon="account" />}
                         mode="outlined"
                     />
@@ -100,7 +101,7 @@ const Login = ({ route }) => {
                         value={user.password}
                         onChangeText={(t) => setUser({ ...user, password: t })}
                         secureTextEntry={!showPassword}
-                        style={styles.input}
+                        style={styles.loginInput}
                         left={<TextInput.Icon icon="lock" />}
                         right={
                             <TextInput.Icon
@@ -122,10 +123,10 @@ const Login = ({ route }) => {
                         Đăng nhập
                     </Button>
 
-                    <View style={styles.registerContainer}>
-                        <Text style={styles.registerText}>Chưa có tài khoản? </Text>
+                    <View style={styles.loginRegisterContainer}>
+                        <Text style={styles.loginRegisterText}>Chưa có tài khoản? </Text>
                         <TouchableOpacity onPress={() => nav.navigate("Register")}>
-                            <Text style={styles.registerLink}>Đăng ký ngay</Text>
+                            <Text style={styles.loginRegisterLink}>Đăng ký ngay</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -134,5 +135,4 @@ const Login = ({ route }) => {
     );
 };
 
-const styles = StyleSheet.create({ container: { flex: 1, backgroundColor: '#f5f5f5', }, scrollContent: { flexGrow: 1, paddingHorizontal: 20, paddingVertical: 40, }, header: { alignItems: 'center', marginBottom: 40, marginTop: 20, }, title: { fontSize: 32, fontWeight: 'bold', color: '#3b5998', marginBottom: 8, }, subtitle: { fontSize: 16, color: '#666', }, formContainer: { backgroundColor: '#ffffff', borderRadius: 15, padding: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 5, }, errorText: { marginBottom: 10, }, input: { marginBottom: 15, }, loginButton: { marginTop: 10, paddingVertical: 8, backgroundColor: '#3b5998', }, registerContainer: { flexDirection: 'row', justifyContent: 'center', marginTop: 20, }, registerText: { color: '#666', fontSize: 14, }, registerLink: { color: '#3b5998', fontSize: 14, fontWeight: 'bold', }, });
 export default Login;

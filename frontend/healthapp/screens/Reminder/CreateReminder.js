@@ -1,9 +1,10 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { TextInput, Button, Card } from "react-native-paper";
 import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { authApis, endpoints } from "../../utils/Apis";
+import styles from "../../styles/screens/Reminder/CreateReminderStyles";
 
 const CreateReminder = () => {
     const [formData, setFormData] = useState({
@@ -184,28 +185,5 @@ const CreateReminder = () => {
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f5f5f5' },
-    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#3b5998', padding: 15, paddingTop: 50 },
-    backButton: { padding: 5 },
-    backIcon: { fontSize: 28, color: '#ffffff', fontWeight: 'bold' },
-    headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#ffffff' },
-    placeholder: { width: 38 },
-    content: { flex: 1 },
-    card: { margin: 15, marginBottom: 0 },
-    sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 15 },
-    typeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-    typeButton: { paddingVertical: 12, paddingHorizontal: 16, borderRadius: 20, backgroundColor: '#f0f0f0', borderWidth: 2, borderColor: '#e0e0e0' },
-    typeButtonActive: { backgroundColor: '#e3f2fd', borderColor: '#3b5998' },
-    typeLabel: { fontSize: 14, fontWeight: '600' },
-    input: { marginBottom: 15 },
-    daysGrid: { flexDirection: 'row', justifyContent: 'space-between' },
-    dayButton: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#f0f0f0', justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: '#e0e0e0' },
-    dayButtonActive: { backgroundColor: '#3b5998', borderColor: '#3b5998' },
-    dayLabel: { fontSize: 14, fontWeight: 'bold', color: '#666' },
-    dayLabelActive: { color: '#ffffff' },
-    saveButton: { margin: 20, paddingVertical: 8 },
-});
 
 export default CreateReminder;

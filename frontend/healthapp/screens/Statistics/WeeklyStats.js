@@ -1,9 +1,10 @@
-import { View, Text, StyleSheet, ScrollView, Dimensions } from "react-native";
+import { View, Text, ScrollView, Dimensions } from "react-native";
 import { Card, ActivityIndicator, SegmentedButtons } from "react-native-paper";
 import { useState, useEffect } from "react";
 import { LineChart, BarChart } from "react-native-chart-kit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { authApis, endpoints } from "../../utils/Apis";
+import styles from "../../styles/screens/Statistics/WeeklyStatsStyles";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -189,23 +190,5 @@ const WeeklyStats = () => {
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f5f5f5' },
-    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    header: { backgroundColor: '#3b5998', padding: 20, paddingTop: 50 },
-    headerTitle: { fontSize: 24, fontWeight: 'bold', color: '#ffffff' },
-    content: { flex: 1 },
-    segmentedButtons: { margin: 15 },
-    summaryGrid: { flexDirection: 'row', paddingHorizontal: 15, gap: 10 },
-    summaryCard: { flex: 1 },
-    summaryContent: { alignItems: 'center', padding: 10 },
-    summaryIcon: { fontSize: 28, marginBottom: 5 },
-    summaryValue: { fontSize: 20, fontWeight: 'bold', color: '#3b5998' },
-    summaryLabel: { fontSize: 12, color: '#666' },
-    chartCard: { margin: 15 },
-    chartTitle: { fontSize: 16, fontWeight: 'bold', color: '#333', marginBottom: 15 },
-    chart: { borderRadius: 10 },
-});
 
 export default WeeklyStats;

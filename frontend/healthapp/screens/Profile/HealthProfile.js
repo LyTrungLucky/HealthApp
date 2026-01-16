@@ -1,9 +1,10 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { TextInput, Button, RadioButton, ActivityIndicator } from "react-native-paper";
 import { useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { authApis, endpoints } from "../../utils/Apis";
+import styles from "../../styles/screens/Profile/HealthProfileStyles";
 
 const HealthProfile = () => {
     const [profile, setProfile] = useState(null);
@@ -248,132 +249,5 @@ const HealthProfile = () => {
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#f5f5f5',
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: '#3b5998',
-        padding: 15,
-        paddingTop: 50,
-    },
-    backButton: {
-        padding: 5,
-    },
-    backIcon: {
-        fontSize: 28,
-        color: '#ffffff',
-        fontWeight: 'bold',
-    },
-    headerTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#ffffff',
-    },
-    editText: {
-        fontSize: 16,
-        color: '#ffffff',
-        fontWeight: '600',
-    },
-    content: {
-        flex: 1,
-    },
-    bmiCard: {
-        backgroundColor: '#ffffff',
-        margin: 15,
-        padding: 30,
-        borderRadius: 15,
-        alignItems: 'center',
-        elevation: 3,
-    },
-    bmiLabel: {
-        fontSize: 16,
-        color: '#666',
-        marginBottom: 10,
-    },
-    bmiValue: {
-        fontSize: 64,
-        fontWeight: 'bold',
-        color: '#3b5998',
-        marginBottom: 15,
-    },
-    bmiStatus: {
-        paddingHorizontal: 20,
-        paddingVertical: 8,
-        borderRadius: 20,
-    },
-    bmiStatusText: {
-        color: '#ffffff',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    form: {
-        backgroundColor: '#ffffff',
-        margin: 15,
-        padding: 20,
-        borderRadius: 15,
-        elevation: 2,
-    },
-    input: {
-        marginBottom: 15,
-    },
-    goalSection: {
-        marginTop: 10,
-        marginBottom: 15,
-    },
-    goalLabel: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#333',
-        marginBottom: 10,
-    },
-    radioItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginVertical: 5,
-    },
-    radioLabel: {
-        fontSize: 15,
-        color: '#333',
-        marginLeft: 8,
-    },
-    bmiPreview: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 15,
-        backgroundColor: '#f5f5f5',
-        borderRadius: 10,
-        marginBottom: 15,
-    },
-    previewLabel: {
-        fontSize: 15,
-        color: '#666',
-    },
-    previewValue: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#3b5998',
-        marginHorizontal: 5,
-    },
-    previewStatus: {
-        fontSize: 14,
-        fontWeight: '600',
-    },
-    saveButton: {
-        marginTop: 10,
-        paddingVertical: 8,
-    },
-});
 
 export default HealthProfile;

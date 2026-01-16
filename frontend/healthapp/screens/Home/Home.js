@@ -1,5 +1,5 @@
 
-import { ScrollView, View, Text, StyleSheet, TouchableOpacity, RefreshControl } from "react-native";
+import { ScrollView, View, Text, TouchableOpacity, RefreshControl } from "react-native";
 import { Card, Avatar, Button, ActivityIndicator } from "react-native-paper";
 import { useContext, useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
@@ -7,6 +7,7 @@ import { MyUserContext } from "../../utils/contexts/MyContext";
 import { authApis, endpoints } from "../../utils/Apis";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import UserMenu from "../../components/UserMenu";
+import styles from "../../styles/screens/Home/HomeStyles";
 
 
 const Home = () => {
@@ -47,7 +48,6 @@ const Home = () => {
         try {
             const token = await AsyncStorage.getItem('token');
             if (token) {
-                
                 try {
                     const profileRes = await authApis(token).get(endpoints['my_profile']);
                     setHealthProfile(profileRes.data);
@@ -55,7 +55,6 @@ const Home = () => {
                     console.log("No health profile yet");
                 }
 
-            
                 try {
                     const trackingRes = await authApis(token).get(endpoints['today_tracking']);
                     setTodayTracking(trackingRes.data);
@@ -82,7 +81,7 @@ const Home = () => {
 
     if (loading) {
         return (
-            <View style={styles.loadingContainer}>
+            <View style={styles.homeLoadingContainer}>
                 <ActivityIndicator size="large" color="#3b5998" />
             </View>
         );
@@ -95,7 +94,6 @@ const Home = () => {
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }
         >
-           
             <View style={styles.header}>
                 <View>
                     <Text style={styles.greeting}>Xin chào,</Text>
@@ -104,13 +102,9 @@ const Home = () => {
                     </Text>
                 </View>
 
-                
                 <UserMenu />
             </View>
 
-
-
-           
             {healthProfile ? (
                 <Card style={styles.summaryCard}>
                     <Card.Content>
@@ -152,7 +146,6 @@ const Home = () => {
                 </Card>
             )}
 
-         
             {todayTracking && (
                 <Card style={styles.trackingCard}>
                     <Card.Content>
@@ -180,7 +173,6 @@ const Home = () => {
                 </Card>
             )}
 
-           
             <View style={styles.quickActions}>
                 <Text style={styles.sectionTitle}>Khám phá</Text>
 
@@ -226,130 +218,5 @@ const Home = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#f5f5f5',
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: 20,
-        backgroundColor: '#3b5998',
-        paddingTop: 50,
-    },
-    greeting: {
-        fontSize: 16,
-        color: '#e0e0e0',
-    },
-    userName: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#ffffff',
-    },
-    summaryCard: {
-        margin: 15,
-        elevation: 3,
-    },
-    cardTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 15,
-        color: '#333',
-    },
-    healthInfo: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-    },
-    healthItem: {
-        alignItems: 'center',
-    },
-    healthLabel: {
-        fontSize: 12,
-        color: '#666',
-        marginBottom: 5,
-    },
-    healthValue: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#3b5998',
-    },
-    infoText: {
-        color: '#666',
-        marginBottom: 15,
-        textAlign: 'center',
-    },
-    createButton: {
-        marginTop: 10,
-    },
-    trackingCard: {
-        marginHorizontal: 15,
-        marginBottom: 15,
-        elevation: 3,
-    },
-    trackingGrid: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-    },
-    trackingItem: {
-        alignItems: 'center',
-    },
-    trackingIcon: {
-        fontSize: 32,
-        marginBottom: 5,
-    },
-    trackingValue: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#333',
-    },
-    trackingLabel: {
-        fontSize: 12,
-        color: '#666',
-    },
-    quickActions: {
-        padding: 15,
-    },
-    sectionTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 15,
-        color: '#333',
-    },
-    actionGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
-    },
-    actionCard: {
-        width: '48%',
-        padding: 20,
-        borderRadius: 15,
-        marginBottom: 15,
-        alignItems: 'center',
-        elevation: 2,
-    },
-    actionIcon: {
-        fontSize: 40,
-        marginBottom: 10,
-    },
-    actionTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#333',
-        marginBottom: 5,
-    },
-    actionSubtitle: {
-        fontSize: 12,
-        color: '#666',
-        textAlign: 'center',
-    },
-});
 
 export default Home;

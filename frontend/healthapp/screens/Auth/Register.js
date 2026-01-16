@@ -4,7 +4,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import Apis, { endpoints } from "../../utils/Apis";
-import MyStyles from "../../styles/MyStyles";
+import styles from "../../styles/screens/Auth/RegisterStyles";
 
 const Register = () => {
     const navigation = useNavigation();
@@ -21,7 +21,6 @@ const Register = () => {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
-    
     const pickImage = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
@@ -42,7 +41,6 @@ const Register = () => {
         }
     };
 
-    
     const validate = () => {
         if (!user.username || !user.password) {
             setError("Vui lòng nhập đầy đủ thông tin!");
@@ -58,7 +56,6 @@ const Register = () => {
         return true;
     };
 
-    
     const register = async () => {
         if (!validate()) return;
 
@@ -102,11 +99,11 @@ const Register = () => {
         }
     };
 
-    
+
     return (
-        <View style={MyStyles.container}>
-            <ScrollView contentContainerStyle={MyStyles.padding}>
-                <Text style={MyStyles.title}>ĐĂNG KÝ TÀI KHOẢN</Text>
+        <View style={styles.container}>
+            <ScrollView contentContainerStyle={styles.padding}>
+                <Text style={styles.title}>ĐĂNG KÝ TÀI KHOẢN</Text>
 
                 <HelperText type="error" visible={!!error}>
                     {error}
@@ -116,7 +113,7 @@ const Register = () => {
                     label="Tên đăng nhập"
                     value={user.username}
                     onChangeText={(t) => setUser({ ...user, username: t })}
-                    style={MyStyles.margin}
+                    style={styles.margin}
                     left={<TextInput.Icon icon="account" />}
                 />
 
@@ -125,7 +122,7 @@ const Register = () => {
                     secureTextEntry
                     value={user.password}
                     onChangeText={(t) => setUser({ ...user, password: t })}
-                    style={MyStyles.margin}
+                    style={styles.margin}
                     left={<TextInput.Icon icon="lock" />}
                 />
 
@@ -134,7 +131,7 @@ const Register = () => {
                     secureTextEntry
                     value={user.confirm}
                     onChangeText={(t) => setUser({ ...user, confirm: t })}
-                    style={MyStyles.margin}
+                    style={styles.margin}
                     left={<TextInput.Icon icon="lock-check" />}
                 />
 
@@ -142,19 +139,19 @@ const Register = () => {
                     label="Tên"
                     value={user.first_name}
                     onChangeText={(t) => setUser({ ...user, first_name: t })}
-                    style={MyStyles.margin}
+                    style={styles.margin}
                 />
 
                 <TextInput
                     label="Họ"
                     value={user.last_name}
                     onChangeText={(t) => setUser({ ...user, last_name: t })}
-                    style={MyStyles.margin}
+                    style={styles.margin}
                 />
 
-                
+
                 <TouchableOpacity
-                    style={MyStyles.imagePicker}
+                    style={styles.imagePicker}
                     onPress={pickImage}
                 >
                     <Text>📷 Chọn ảnh đại diện</Text>
@@ -163,7 +160,7 @@ const Register = () => {
                 {user.avatar && (
                     <Image
                         source={{ uri: user.avatar.uri }}
-                        style={MyStyles.avatar}
+                        style={styles.avatar}
                     />
                 )}
 
@@ -172,14 +169,14 @@ const Register = () => {
                     loading={loading}
                     disabled={loading}
                     onPress={register}
-                    style={MyStyles.margin}
+                    style={styles.margin}
                 >
                     Đăng ký
                 </Button>
 
                 <TouchableOpacity
                     onPress={() => navigation.navigate("Login")}
-                    style={MyStyles.center}
+                    style={styles.center}
                 >
                     <Text>Đã có tài khoản? Đăng nhập</Text>
                 </TouchableOpacity>

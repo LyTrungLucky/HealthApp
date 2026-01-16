@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, Alert, TouchableOpacity, Image } from "react-native";
+import { View, Text, ScrollView, Alert, TouchableOpacity, Image } from "react-native";
 import { TextInput, Button, Card, Switch, Chip } from "react-native-paper";
 import { useState, useEffect } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -6,6 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { authApis, endpoints } from "../../utils/Apis";
 import * as ImagePicker from 'expo-image-picker';
 import moment from "moment";
+import styles from "../../styles/screens/Journal/CreateJournalStyles";
 
 const CreateJournal = () => {
     const nav = useNavigation();
@@ -154,7 +155,6 @@ const CreateJournal = () => {
             </View>
 
             <ScrollView style={styles.content}>
-                
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.sectionTitle}>📅 Ngày</Text>
@@ -167,7 +167,6 @@ const CreateJournal = () => {
                     </Card.Content>
                 </Card>
 
-                
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.sectionTitle}>📝 Nội dung</Text>
@@ -190,7 +189,6 @@ const CreateJournal = () => {
                     </Card.Content>
                 </Card>
 
-                
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.sectionTitle}>😊 Tâm trạng</Text>
@@ -219,7 +217,6 @@ const CreateJournal = () => {
                     </Card.Content>
                 </Card>
 
-                
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.sectionTitle}>🏃‍♂️ Tập luyện</Text>
@@ -244,7 +241,6 @@ const CreateJournal = () => {
                     </Card.Content>
                 </Card>
 
-                
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.sectionTitle}>⚡ Mức năng lượng: {journal.energy_level}/10</Text>
@@ -270,7 +266,6 @@ const CreateJournal = () => {
                     </Card.Content>
                 </Card>
 
-                
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.sectionTitle}>😴 Giấc ngủ</Text>
@@ -285,7 +280,6 @@ const CreateJournal = () => {
                     </Card.Content>
                 </Card>
 
-                
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.sectionTitle}>📷 Hình ảnh (tùy chọn)</Text>
@@ -309,7 +303,6 @@ const CreateJournal = () => {
                     </Card.Content>
                 </Card>
 
-                
                 <Button
                     mode="contained"
                     onPress={saveJournal}
@@ -324,135 +317,5 @@ const CreateJournal = () => {
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#f5f5f5',
-    },
-    header: {
-        backgroundColor: '#3b5998',
-        padding: 20,
-        paddingTop: 50,
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    backButton: {
-        marginRight: 15,
-    },
-    backText: {
-        color: '#ffffff',
-        fontSize: 16,
-    },
-    headerTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#ffffff',
-        flex: 1,
-    },
-    content: {
-        flex: 1,
-        padding: 15,
-    },
-    card: {
-        marginBottom: 15,
-    },
-    sectionTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#333',
-        marginBottom: 10,
-    },
-    input: {
-        marginBottom: 10,
-    },
-    textArea: {
-        marginBottom: 10,
-    },
-    moodRow: {
-        flexDirection: 'row',
-        gap: 10,
-    },
-    moodButton: {
-        alignItems: 'center',
-        padding: 10,
-        borderRadius: 10,
-        backgroundColor: '#f0f0f0',
-        minWidth: 80,
-    },
-    selectedMood: {
-        backgroundColor: '#3b5998',
-    },
-    moodEmoji: {
-        fontSize: 24,
-        marginBottom: 5,
-    },
-    moodLabel: {
-        fontSize: 12,
-        color: '#666',
-    },
-    selectedMoodLabel: {
-        color: '#ffffff',
-        fontWeight: 'bold',
-    },
-    switchRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 10,
-    },
-    switchLabel: {
-        fontSize: 16,
-        color: '#333',
-    },
-    energyRow: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 8,
-    },
-    energyButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: '#f0f0f0',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    selectedEnergy: {
-        backgroundColor: '#3b5998',
-    },
-    energyText: {
-        fontSize: 16,
-        color: '#666',
-        fontWeight: 'bold',
-    },
-    selectedEnergyText: {
-        color: '#ffffff',
-    },
-    imageContainer: {
-        alignItems: 'center',
-    },
-    image: {
-        width: 200,
-        height: 150,
-        borderRadius: 10,
-        marginBottom: 10,
-    },
-    removeImageButton: {
-        padding: 8,
-    },
-    removeImageText: {
-        color: '#f44336',
-        fontSize: 14,
-    },
-    imageButton: {
-        borderColor: '#3b5998',
-    },
-    saveButton: {
-        backgroundColor: '#3b5998',
-        marginVertical: 20,
-        paddingVertical: 8,
-    },
-});
 
 export default CreateJournal;

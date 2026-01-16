@@ -1,10 +1,11 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Alert, RefreshControl } from "react-native";
 import { Card, FAB, Chip, ActivityIndicator, Searchbar, List } from "react-native-paper";
 import { useState, useEffect, useCallback } from "react";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { authApis, endpoints } from "../../utils/Apis";
 import moment from "moment";
+import styles from "../../styles/screens/Journal/JournalListStyles";
 
 const JournalList = () => {
     const [journals, setJournals] = useState([]);
@@ -252,149 +253,5 @@ const moodLabels = {
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#f5f5f5',
-    },
-    header: {
-        backgroundColor: '#3b5998',
-        padding: 20,
-        paddingTop: 50,
-    },
-    headerTitle: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#ffffff',
-    },
-    content: {
-        flex: 1,
-        padding: 15,
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#f5f5f5',
-    },
-    loadingText: {
-        marginTop: 10,
-        fontSize: 16,
-        color: '#666',
-    },
-    searchBar: {
-        marginBottom: 15,
-        elevation: 2,
-    },
-    filterCard: {
-        marginBottom: 15,
-    },
-    filterTitle: {
-        fontSize: 14,
-        fontWeight: 'bold',
-        color: '#666',
-        marginBottom: 8,
-    },
-    filterRow: {
-        flexDirection: 'row',
-        gap: 8,
-    },
-    filterChip: {
-        backgroundColor: '#f0f0f0',
-    },
-    selectedChip: {
-        backgroundColor: '#3b5998',
-    },
-    emptyCard: {
-        marginTop: 50,
-    },
-    emptyContent: {
-        alignItems: 'center',
-        paddingVertical: 30,
-    },
-    emptyIcon: {
-        fontSize: 48,
-        marginBottom: 15,
-    },
-    emptyTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#333',
-        marginBottom: 8,
-    },
-    emptySubtitle: {
-        fontSize: 14,
-        color: '#666',
-        textAlign: 'center',
-    },
-    journalCard: {
-        marginBottom: 15,
-        elevation: 2,
-    },
-    journalHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: 10,
-    },
-    journalInfo: {
-        flex: 1,
-    },
-    journalDate: {
-        fontSize: 12,
-        color: '#3b5998',
-        fontWeight: '600',
-    },
-    journalTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#333',
-        marginTop: 2,
-    },
-    journalMeta: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-    },
-    moodEmoji: {
-        fontSize: 24,
-    },
-    workoutBadge: {
-        fontSize: 20,
-    },
-    journalContent: {
-        fontSize: 14,
-        color: '#666',
-        lineHeight: 20,
-        marginBottom: 10,
-    },
-    journalFooter: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    journalStats: {
-        flex: 1,
-    },
-    statText: {
-        fontSize: 12,
-        color: '#888',
-        marginBottom: 2,
-    },
-    deleteButton: {
-        padding: 8,
-    },
-    deleteText: {
-        fontSize: 18,
-    },
-    fab: {
-        position: 'absolute',
-        margin: 16,
-        right: 0,
-        bottom: 0,
-        backgroundColor: '#3b5998',
-    },
-});
 
 export default JournalList;

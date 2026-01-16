@@ -1,605 +1,912 @@
-# health/management/commands/populate_data.py
 from django.core.management.base import BaseCommand
-from django.contrib.auth import get_user_model
 from health.models import (
-    HealthProfile, ExerciseCategory, Exercise, Food,
-    WorkoutPlan, WorkoutSchedule, NutritionPlan, MealSchedule
+    User, HealthProfile, DailyTracking,
+    ExerciseCategory, Exercise,
+    WorkoutPlan, WorkoutSchedule,
+    Food, NutritionPlan, MealSchedule,
+    Progress, Consultation, Reminder,
+    HealthJournal, ChatRoom, Message
 )
-from datetime import date, timedelta
-
-User = get_user_model()
+from django.utils import timezone
+from datetime import datetime, timedelta
+import random
+import json
 
 
 class Command(BaseCommand):
-    help = 'Populate database with sample data'
+    help = "Populate database with sample health and fitness data"
 
-    def handle(self, *args, **kwargs):
-        self.stdout.write('Creating sample data...')
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--clear",
+            action="store_true",
+            help="Clear existing data before populating",
+        )
 
-        # 1. Create Users
-        self.create_users()
+    def handle(self, *args, **options):
+        if options["clear"]:
+            self.stdout.write("Clearing existing data...")
+            self.clear_data()
 
-        # 2. Create Exercise Categories & Exercises
-        self.create_exercises()
+        self.stdout.write("Starting data population...")
 
-        # 3. Create Foods
-        self.create_foods()
+        # Create users with different roles
+        self.stdout.write("Creating users...")
+        users, nutritionists, trainers = self.create_users()
 
-        # 4. Create Health Profiles
-        self.create_health_profiles()
+        # Create exercise categories
+        self.stdout.write("Creating exercise categories...")
+        categories = self.create_exercise_categories()
 
-        # 5. Create Workout Plans
-        self.create_workout_plans()
+        # Create exercises
+        self.stdout.write("Creating exercises...")
+        exercises = self.create_exercises(categories)
 
-        # 6. Create Nutrition Plans
-        self.create_nutrition_plans()
+        # Create workout plans
+        self.stdout.write("Creating workout plans...")
+        workout_plans = self.create_workout_plans(users, trainers)
 
-        self.stdout.write(self.style.SUCCESS('Successfully populated database!'))
+        # Create workout schedules
+        self.stdout.write("Creating workout schedules...")
+        self.create_workout_schedules(workout_plans, exercises)
+
+        # Create foods
+        self.stdout.write("Creating foods...")
+        foods = self.create_foods()
+
+        # Create nutrition plans
+        self.stdout.write("Creating nutrition plans...")
+        nutrition_plans = self.create_nutrition_plans(users, nutritionists)
+
+        # Create meal schedules
+        self.stdout.write("Creating meal schedules...")
+        self.create_meal_schedules(nutrition_plans, foods)
+
+        # Create daily tracking
+        self.stdout.write("Creating daily tracking records...")
+        self.create_daily_tracking(users)
+
+        # Create progress records
+        self.stdout.write("Creating progress records...")
+        self.create_progress_records(users)
+
+        # Create consultations
+        self.stdout.write("Creating consultations...")
+        self.create_consultations(users, nutritionists, trainers)
+
+        # Create reminders
+        self.stdout.write("Creating reminders...")
+        self.create_reminders(users)
+
+        # Create health journals
+        self.stdout.write("Creating health journals...")
+        self.create_health_journals(users)
+
+        # Create chat rooms and messages
+        self.stdout.write("Creating chat rooms and messages...")
+        self.create_chat_rooms_and_messages(users, nutritionists, trainers)
+
+        self.stdout.write(self.style.SUCCESS("Successfully populated database with sample data!"))
+
+    def clear_data(self):
+        """Clear all existing data"""
+        Message.objects.all().delete()
+        ChatRoom.objects.all().delete()
+        HealthJournal.objects.all().delete()
+        Reminder.objects.all().delete()
+        Consultation.objects.all().delete()
+        Progress.objects.all().delete()
+        DailyTracking.objects.all().delete()
+        MealSchedule.objects.all().delete()
+        NutritionPlan.objects.all().delete()
+        Food.objects.all().delete()
+        WorkoutSchedule.objects.all().delete()
+        WorkoutPlan.objects.all().delete()
+        Exercise.objects.all().delete()
+        ExerciseCategory.objects.all().delete()
+        HealthProfile.objects.all().delete()
+        User.objects.all().delete()
 
     def create_users(self):
-        # Admin
-        if not User.objects.filter(username='admin').exists():
-            User.objects.create_superuser(
-                username='admin',
-                email='admin@health.com',
-                password='admin123',
-                first_name='Admin',
-                last_name='System'
+        """Create sample users with different roles: user, nutritionist, trainer"""
+        users = []
+        nutritionists = []
+        trainers = []
+
+        # Regular users
+        user_data = [
+            {
+                "username": "john_doe",
+                "email": "john@example.com",
+                "first_name": "John",
+                "last_name": "Doe",
+                "role": "user",
+                "profile": {
+                    "age": 28,
+                    "height": 175.0,
+                    "weight": 75.0,
+                    "goal": "gain_muscle",
+                    "target_weight": 80.0
+                }
+            },
+            {
+                "username": "jane_smith",
+                "email": "jane@example.com",
+                "first_name": "Jane",
+                "last_name": "Smith",
+                "role": "user",
+                "profile": {
+                    "age": 25,
+                    "height": 165.0,
+                    "weight": 60.0,
+                    "goal": "lose_weight",
+                    "target_weight": 80.0
+                }
+            },
+            {
+                "username": "mike_johnson",
+                "email": "mike@example.com",
+                "first_name": "Mike",
+                "last_name": "Johnson",
+                "role": "user",
+                "profile": {
+                    "age": 35,
+                    "height": 180.0,
+                    "weight": 85.0,
+                    "goal": "maintain",
+                    "target_weight": 80.0
+                }
+            },
+            {
+                "username": "sarah_williams",
+                "email": "sarah@example.com",
+                "first_name": "Sarah",
+                "last_name": "Williams",
+                "role": "user",
+                "profile": {
+                    "age": 30,
+                    "height": 170.0,
+                    "weight": 65.0,
+                    "goal": "gain_muscle",
+                    "target_weight": 80.0
+                }
+            },
+            {
+                "username": "alex_brown",
+                "email": "alex@example.com",
+                "first_name": "Alex",
+                "last_name": "Brown",
+                "role": "user",
+                "profile": {
+                    "age": 22,
+                    "height": 178.0,
+                    "weight": 70.0,
+                    "goal": "lose_weight",
+                    "target_weight": 80.0
+                }
+            }
+        ]
+
+        # Nutritionists
+        nutritionist_data = [
+            {
+                "username": "dr_nutrition",
+                "email": "nutrition@example.com",
+                "first_name": "Emily",
+                "last_name": "Nutrition",
+                "role": "nutritionist",
+                "profile": {
+                    "age": 35,
+                    "height": 168.0,
+                    "weight": 58.0,
+                    "goal": "maintain",
+                    "target_weight": 80.0
+                }
+            },
+            {
+                "username": "healthy_coach",
+                "email": "coach@example.com",
+                "first_name": "David",
+                "last_name": "Healthy",
+                "role": "nutritionist",
+                "profile": {
+                    "age": 40,
+                    "height": 175.0,
+                    "weight": 72.0,
+                    "goal": "maintain",
+                    "target_weight": 80.0
+                }
+            }
+        ]
+
+        # Trainers
+        trainer_data = [
+            {
+                "username": "coach_fit",
+                "email": "fit@example.com",
+                "first_name": "Robert",
+                "last_name": "Fitness",
+                "role": "trainer",
+                "profile": {
+                    "age": 32,
+                    "height": 182.0,
+                    "weight": 80.0,
+                    "goal": "maintain",
+                    "target_weight": 80.0
+                }
+            },
+            {
+                "username": "trainer_pro",
+                "email": "pro@example.com",
+                "first_name": "Lisa",
+                "last_name": "Strong",
+                "role": "trainer",
+                "profile": {
+                    "age": 28,
+                    "height": 172.0,
+                    "weight": 62.0,
+                    "goal": "maintain",
+                    "target_weight": 80.0
+                }
+            }
+        ]
+
+        # Create users
+        for data in user_data:
+            profile_data = data.pop("profile")
+            role = data.pop("role")
+            user = User.objects.create_user(
+                username=data["username"],
+                email=data["email"],
+                password="password123",
+                first_name=data["first_name"],
+                last_name=data["last_name"],
+                role=role
             )
+            HealthProfile.objects.create(user=user, **profile_data)
+            users.append(user)
 
-        # Regular Users
-        users_data = [
-            {'username': 'john_doe', 'first_name': 'John', 'last_name': 'Doe', 'role': 'user',
-             'email': 'john@example.com'},
-            {'username': 'jane_smith', 'first_name': 'Jane', 'last_name': 'Smith', 'role': 'user',
-             'email': 'jane@example.com'},
-            {'username': 'mike_wilson', 'first_name': 'Mike', 'last_name': 'Wilson', 'role': 'user',
-             'email': 'mike@example.com'},
-        ]
+        # Create nutritionists
+        for data in nutritionist_data:
+            profile_data = data.pop("profile")
+            role = data.pop("role")
+            user = User.objects.create_user(
+                username=data["username"],
+                email=data["email"],
+                password="password123",
+                first_name=data["first_name"],
+                last_name=data["last_name"],
+                role=role
+            )
+            HealthProfile.objects.create(user=user, **profile_data)
+            nutritionists.append(user)
 
-        for data in users_data:
-            if not User.objects.filter(username=data['username']).exists():
-                User.objects.create_user(
-                    password='password123',
-                    **data
-                )
+        # Create trainers
+        for data in trainer_data:
+            profile_data = data.pop("profile")
+            role = data.pop("role")
+            user = User.objects.create_user(
+                username=data["username"],
+                email=data["email"],
+                password="password123",
+                first_name=data["first_name"],
+                last_name=data["last_name"],
+                role=role
+            )
+            HealthProfile.objects.create(user=user, **profile_data)
+            trainers.append(user)
 
-        # Experts
-        experts_data = [
-            {'username': 'dr_nutrition', 'first_name': 'Dr. Sarah', 'last_name': 'Johnson', 'role': 'nutritionist',
-             'email': 'sarah@health.com'},
-            {'username': 'coach_fit', 'first_name': 'Coach Tom', 'last_name': 'Anderson', 'role': 'trainer',
-             'email': 'tom@health.com'},
-        ]
+        return users, nutritionists, trainers
 
-        for data in experts_data:
-            if not User.objects.filter(username=data['username']).exists():
-                User.objects.create_user(
-                    password='password123',
-                    **data
-                )
-
-        self.stdout.write('✓ Created users')
-
-    def create_exercises(self):
-        # Categories
+    def create_exercise_categories(self):
+        """Create exercise categories"""
         categories_data = [
-            {'name': 'Cardio', 'description': 'Bài tập tim mạch'},
-            {'name': 'Strength', 'description': 'Bài tập sức mạnh'},
-            {'name': 'Yoga', 'description': 'Bài tập Yoga'},
-            {'name': 'HIIT', 'description': 'Bài tập cường độ cao'},
-            {'name': 'Flexibility', 'description': 'Bài tập dẻo dai'},
+            {"name": "Cardio", "description": "Bài tập tim mạch giúp tăng sức bền và đốt cháy calo"},
+            {"name": "Strength", "description": "Bài tập sức mạnh giúp xây dựng cơ bắp"},
+            {"name": "Flexibility", "description": "Bài tập co giãn tăng độ linh hoạt"},
+            {"name": "Balance", "description": "Bài tập cân bằng và ổn định"},
+            {"name": "Core", "description": "Bài tập tăng cường cơ core"},
+            {"name": "HIIT", "description": "Bài tập cường độ cao ngắt quãng"},
+            {"name": "Yoga", "description": "Bài tập yoga và thiền định"},
+            {"name": "Pilates", "description": "Bài tập pilates cho core và độ linh hoạt"},
         ]
 
+        categories = []
         for data in categories_data:
-            ExerciseCategory.objects.get_or_create(**data)
+            category, created = ExerciseCategory.objects.get_or_create(**data)
+            categories.append(category)
 
-        # Exercises
+        return categories
+
+    def create_exercises(self, categories):
+        """Create sample exercises"""
         exercises_data = [
             # Cardio
-            {
-                'name': 'Chạy bộ',
-                'description': 'Chạy bộ trên máy hoặc ngoài trời với tốc độ vừa phải',
-                'category': ExerciseCategory.objects.get(name='Cardio'),
-                'difficulty': 'easy',
-                'duration': 30,
-                'calories_burned': 300,
-                'instructions': '1. Khởi động 5 phút\n2. Chạy đều 20 phút\n3. Hạ nhịp 5 phút'
-            },
-            {
-                'name': 'Đạp xe',
-                'description': 'Đạp xe trên máy hoặc ngoài trời',
-                'category': ExerciseCategory.objects.get(name='Cardio'),
-                'difficulty': 'easy',
-                'duration': 45,
-                'calories_burned': 400,
-                'instructions': '1. Khởi động 5 phút\n2. Đạp đều 35 phút\n3. Hạ nhịp 5 phút'
-            },
-            {
-                'name': 'Nhảy dây',
-                'description': 'Nhảy dây tốc độ cao để đốt cháy calo',
-                'category': ExerciseCategory.objects.get(name='Cardio'),
-                'difficulty': 'medium',
-                'duration': 20,
-                'calories_burned': 250,
-                'instructions': '1. Khởi động cổ chân\n2. Nhảy 30 giây, nghỉ 10 giây\n3. Lặp lại 20 phút'
-            },
+            {"name": "Chạy bộ", "category": "Cardio", "description": "Chạy ngoài trời hoặc máy chạy bộ",
+             "duration": 30, "calories_burned": 300, "difficulty": "medium"},
+            {"name": "Đạp xe", "category": "Cardio", "description": "Đạp xe cố định hoặc ngoài trời",
+             "duration": 30, "calories_burned": 240, "difficulty": "easy"},
+            {"name": "Nhảy dây", "category": "Cardio", "description": "Nhảy dây đốt cháy calo",
+             "duration": 15, "calories_burned": 180, "difficulty": "medium"},
+            {"name": "Bơi lội", "category": "Cardio", "description": "Bơi toàn thân",
+             "duration": 30, "calories_burned": 330, "difficulty": "medium"},
 
             # Strength
-            {
-                'name': 'Push-up (Chống đẩy)',
-                'description': 'Bài tập tăng cường sức mạnh cơ ngực và tay',
-                'category': ExerciseCategory.objects.get(name='Strength'),
-                'difficulty': 'medium',
-                'duration': 15,
-                'calories_burned': 100,
-                'instructions': '1. Nằm sấp, đặt tay rộng bằng vai\n2. Đẩy người lên xuống\n3. 3 sets x 15 reps'
-            },
-            {
-                'name': 'Squat (Gánh tạ)',
-                'description': 'Bài tập chân và mông hiệu quả',
-                'category': ExerciseCategory.objects.get(name='Strength'),
-                'difficulty': 'medium',
-                'duration': 20,
-                'calories_burned': 150,
-                'instructions': '1. Đứng thẳng, chân rộng bằng vai\n2. Hạ người xuống như ngồi ghế\n3. 3 sets x 20 reps'
-            },
-            {
-                'name': 'Plank',
-                'description': 'Bài tập tăng cường cơ core',
-                'category': ExerciseCategory.objects.get(name='Strength'),
-                'difficulty': 'easy',
-                'duration': 10,
-                'calories_burned': 50,
-                'instructions': '1. Chống tay hoặc khuỷu tay\n2. Giữ thẳng người\n3. Giữ 60 giây x 3 sets'
-            },
-            {
-                'name': 'Lunges',
-                'description': 'Bài tập chân đơn hiệu quả',
-                'category': ExerciseCategory.objects.get(name='Strength'),
-                'difficulty': 'medium',
-                'duration': 15,
-                'calories_burned': 120,
-                'instructions': '1. Bước chân về phía trước\n2. Hạ người xuống\n3. 3 sets x 12 reps mỗi chân'
-            },
+            {"name": "Chống đẩy", "category": "Strength", "description": "Bài tập chống đẩy cơ bản",
+             "duration": 10, "calories_burned": 70, "difficulty": "easy"},
+            {"name": "Pull-ups", "category": "Strength", "description": "Kéo xà đơn",
+             "duration": 10, "calories_burned": 80, "difficulty": "hard"},
+            {"name": "Squat", "category": "Strength", "description": "Gánh tạ hoặc tự trọng",
+             "duration": 15, "calories_burned": 120, "difficulty": "easy"},
+            {"name": "Deadlift", "category": "Strength", "description": "Nâng tạ đòn",
+             "duration": 15, "calories_burned": 135, "difficulty": "hard"},
+            {"name": "Bench Press", "category": "Strength", "description": "Đẩy ngực với tạ đòn",
+             "duration": 15, "calories_burned": 105, "difficulty": "medium"},
+            {"name": "Lunges", "category": "Strength", "description": "Bước dài tập đùi",
+             "duration": 10, "calories_burned": 60, "difficulty": "easy"},
+
+            # Core
+            {"name": "Plank", "category": "Core", "description": "Nằm sấp chống tay",
+             "duration": 5, "calories_burned": 25, "difficulty": "easy"},
+            {"name": "Crunches", "category": "Core", "description": "Gập bụng",
+             "duration": 10, "calories_burned": 50, "difficulty": "easy"},
+            {"name": "Russian Twists", "category": "Core", "description": "Xoay người tập bụng",
+             "duration": 10, "calories_burned": 60, "difficulty": "medium"},
+            {"name": "Mountain Climbers", "category": "Core", "description": "Leo núi tại chỗ",
+             "duration": 10, "calories_burned": 90, "difficulty": "medium"},
 
             # HIIT
-            {
-                'name': 'Burpees',
-                'description': 'Bài tập toàn thân cường độ cao',
-                'category': ExerciseCategory.objects.get(name='HIIT'),
-                'difficulty': 'hard',
-                'duration': 15,
-                'calories_burned': 200,
-                'instructions': '1. Đứng thẳng\n2. Hạ xuống chống đẩy\n3. Nhảy lên cao\n4. 3 sets x 10 reps'
-            },
-            {
-                'name': 'Mountain Climbers',
-                'description': 'Bài tập leo núi tại chỗ',
-                'category': ExerciseCategory.objects.get(name='HIIT'),
-                'difficulty': 'hard',
-                'duration': 10,
-                'calories_burned': 150,
-                'instructions': '1. Tư thế chống đẩy\n2. Kéo chân lên ngực xen kẽ\n3. 30 giây x 4 sets'
-            },
+            {"name": "Burpees", "category": "HIIT", "description": "Bài tập toàn thân bùng nổ",
+             "duration": 10, "calories_burned": 120, "difficulty": "hard"},
+            {"name": "High Knees", "category": "HIIT", "description": "Chạy tại chỗ nâng cao đầu gối",
+             "duration": 10, "calories_burned": 100, "difficulty": "medium"},
 
             # Yoga
-            {
-                'name': 'Sun Salutation (Chào mặt trời)',
-                'description': 'Chuỗi động tác yoga cơ bản',
-                'category': ExerciseCategory.objects.get(name='Yoga'),
-                'difficulty': 'easy',
-                'duration': 20,
-                'calories_burned': 80,
-                'instructions': '1. 12 động tác liên tiếp\n2. Thở đều\n3. Lặp lại 5 lần'
-            },
-            {
-                'name': 'Warrior Pose',
-                'description': 'Tư thế chiến binh',
-                'category': ExerciseCategory.objects.get(name='Yoga'),
-                'difficulty': 'medium',
-                'duration': 15,
-                'calories_burned': 60,
-                'instructions': '1. Duỗi thẳng tay\n2. Chân trước gập 90 độ\n3. Giữ 30 giây mỗi bên'
-            },
+            {"name": "Downward Dog", "category": "Yoga", "description": "Tư thế yoga cơ bản",
+             "duration": 5, "calories_burned": 15, "difficulty": "easy"},
+            {"name": "Warrior Pose", "category": "Yoga", "description": "Tư thế chiến binh",
+             "duration": 5, "calories_burned": 15, "difficulty": "easy"},
         ]
+
+        category_dict = {cat.name: cat for cat in categories}
+        exercises = []
 
         for data in exercises_data:
-            Exercise.objects.get_or_create(**data)
+            category_name = data.pop("category")
+            exercise, created = Exercise.objects.get_or_create(
+                name=data["name"],
+                defaults={
+                    "category": category_dict[category_name],
+                    **data
+                }
+            )
+            exercises.append(exercise)
 
-        self.stdout.write('✓ Created exercises')
+        return exercises
+
+    def create_workout_plans(self, users, trainers):
+        """Create sample workout plans by trainers for users"""
+        from datetime import date, timedelta
+
+        workout_plans_data = [
+            {
+                "name": "Kế hoạch tăng cơ cơ bản",
+                "description": "Chương trình tập luyện toàn thân cho người mới bắt đầu muốn tăng cơ (8 tuần)",
+                "goal": "gain_muscle",
+                "user": users[0] if users else None,
+                "created_by": trainers[0] if trainers else None,
+                "start_date": date.today(),
+                "end_date": date.today() + timedelta(weeks=8)
+            },
+            {
+                "name": "Giảm cân hiệu quả",
+                "description": "Chương trình cardio và HIIT để giảm mỡ nhanh chóng (12 tuần)",
+                "goal": "lose_weight",
+                "user": users[1] if len(users) > 1 else users[0],
+                "created_by": trainers[1] if len(trainers) > 1 else trainers[0],
+                "start_date": date.today(),
+                "end_date": date.today() + timedelta(weeks=12)
+            },
+            {
+                "name": "Duy trì sức khỏe",
+                "description": "Chương trình cân bằng để duy trì thể trạng (4 tuần)",
+                "goal": "maintain",
+                "user": users[2] if len(users) > 2 else users[0],
+                "created_by": trainers[0] if trainers else None,
+                "start_date": date.today(),
+                "end_date": date.today() + timedelta(weeks=4)
+            },
+            {
+                "name": "Tăng sức mạnh nâng cao",
+                "description": "Chương trình tập luyện sức mạnh cho người đã có kinh nghiệm (16 tuần)",
+                "goal": "gain_muscle",
+                "user": users[3] if len(users) > 3 else users[0],
+                "created_by": trainers[1] if len(trainers) > 1 else trainers[0],
+                "start_date": date.today(),
+                "end_date": date.today() + timedelta(weeks=16)
+            },
+            {
+                "name": "HIIT giảm cân nhanh",
+                "description": "Chương trình HIIT cường độ cao (4 tuần)",
+                "goal": "lose_weight",
+                "user": users[4] if len(users) > 4 else users[0],
+                "created_by": trainers[0] if trainers else None,
+                "start_date": date.today(),
+                "end_date": date.today() + timedelta(weeks=4)
+            },
+            {
+                "name": "Yoga & Thư giãn",
+                "description": "Chương trình yoga và co giãn để cải thiện sức khỏe tinh thần (8 tuần)",
+                "goal": "maintain",
+                "user": users[0] if users else None,
+                "created_by": trainers[1] if len(trainers) > 1 else trainers[0],
+                "start_date": date.today(),
+                "end_date": date.today() + timedelta(weeks=8)
+            },
+        ]
+
+        workout_plans = []
+        for data in workout_plans_data:
+            plan, created = WorkoutPlan.objects.get_or_create(
+                name=data["name"],
+                user=data["user"],
+                defaults=data
+            )
+            workout_plans.append(plan)
+
+        return workout_plans
+
+    def create_workout_schedules(self, workout_plans, exercises):
+        """Create workout schedules for each plan (weekday-based)"""
+        # weekday: 0=Thứ 2, 1=Thứ 3, 2=Thứ 4, 3=Thứ 5, 4=Thứ 6, 5=Thứ 7, 6=Chủ nhật
+        weekday_map = {
+            "monday": 0,
+            "tuesday": 1,
+            "wednesday": 2,
+            "thursday": 3,
+            "friday": 4,
+            "saturday": 5,
+            "sunday": 6
+        }
+
+        exercise_dict = {ex.name: ex for ex in exercises}
+
+        # Mapping workout plans to exercises by weekday
+        schedule_mapping = {
+            "Kế hoạch tăng cơ cơ bản": {
+                "monday": ["Chống đẩy", "Squat", "Plank"],
+                "wednesday": ["Bench Press", "Lunges", "Crunches"],
+                "friday": ["Pull-ups", "Deadlift", "Russian Twists"],
+            },
+            "Giảm cân hiệu quả": {
+                "monday": ["Chạy bộ", "Burpees", "High Knees"],
+                "wednesday": ["Đạp xe", "Nhảy dây", "Mountain Climbers"],
+                "friday": ["Bơi lội", "Burpees", "High Knees"],
+                "saturday": ["Chạy bộ", "Mountain Climbers"],
+            },
+            "Duy trì sức khỏe": {
+                "tuesday": ["Chạy bộ", "Squat", "Plank"],
+                "thursday": ["Đạp xe", "Chống đẩy", "Crunches"],
+                "saturday": ["Downward Dog", "Warrior Pose"],
+            },
+            "Tăng sức mạnh nâng cao": {
+                "monday": ["Deadlift", "Bench Press", "Pull-ups"],
+                "tuesday": ["Squat", "Lunges", "Russian Twists"],
+                "thursday": ["Bench Press", "Deadlift", "Plank"],
+                "friday": ["Pull-ups", "Squat", "Mountain Climbers"],
+            },
+            "HIIT giảm cân nhanh": {
+                "monday": ["Burpees", "High Knees", "Mountain Climbers"],
+                "wednesday": ["Burpees", "Nhảy dây", "High Knees"],
+                "friday": ["High Knees", "Mountain Climbers", "Burpees"],
+            },
+            "Yoga & Thư giãn": {
+                "monday": ["Downward Dog", "Warrior Pose"],
+                "wednesday": ["Warrior Pose", "Downward Dog"],
+                "friday": ["Downward Dog", "Warrior Pose"],
+                "sunday": ["Warrior Pose", "Downward Dog"],
+            }
+        }
+
+        for plan in workout_plans:
+            if plan.name in schedule_mapping:
+                for weekday_str, exercise_names in schedule_mapping[plan.name].items():
+                    weekday_int = weekday_map[weekday_str]
+                    for exercise_name in exercise_names:
+                        if exercise_name in exercise_dict:
+                            WorkoutSchedule.objects.get_or_create(
+                                workout_plan=plan,
+                                weekday=weekday_int,
+                                exercise=exercise_dict[exercise_name],
+                                defaults={
+                                    "sets": random.randint(3, 5),
+                                    "reps": random.randint(8, 15),
+                                }
+                            )
 
     def create_foods(self):
+        """Create sample foods with meal_type"""
         foods_data = [
             # Breakfast
-            {
-                'name': 'Yến mạch sữa chua',
-                'description': 'Yến mạch nguyên hạt kết hợp với sữa chua Hy Lạp và trái cây',
-                'meal_type': 'breakfast',
-                'calories': 350,
-                'protein': 15,
-                'carbs': 50,
-                'fat': 8,
-                'recipe': '1. 50g yến mạch\n2. 150ml sữa chua\n3. Chuối, dâu tây\n4. 1 thìa mật ong'
-            },
-            {
-                'name': 'Trứng chiên rau củ',
-                'description': '2 quả trứng chiên với rau củ xào',
-                'meal_type': 'breakfast',
-                'calories': 280,
-                'protein': 18,
-                'carbs': 12,
-                'fat': 16,
-                'recipe': '1. 2 quả trứng\n2. Cà chua, hành tây, ớt chuông\n3. Ít dầu olive'
-            },
-            {
-                'name': 'Bánh mì nguyên cám bơ trứng',
-                'description': 'Bánh mì nguyên cám với bơ và trứng luộc',
-                'meal_type': 'breakfast',
-                'calories': 320,
-                'protein': 14,
-                'carbs': 38,
-                'fat': 12,
-                'recipe': '1. 2 lát bánh mì nguyên cám\n2. 1/4 quả bơ\n3. 1 quả trứng luộc'
-            },
+            {"name": "Trứng luộc", "meal_type": "breakfast",
+             "calories": 78, "protein": 6.0, "carbs": 0.6, "fat": 5.0},
+            {"name": "Yến mạch", "meal_type": "breakfast",
+             "calories": 389, "protein": 16.9, "carbs": 66.3, "fat": 6.9},
+            {"name": "Sữa chua Hy Lạp", "meal_type": "breakfast",
+             "calories": 59, "protein": 10.0, "carbs": 3.6, "fat": 0.4},
+            {"name": "Bánh mì nguyên cám", "meal_type": "breakfast",
+             "calories": 69, "protein": 3.6, "carbs": 11.6, "fat": 0.9},
+            {"name": "Chuối", "meal_type": "breakfast",
+             "calories": 105, "protein": 1.3, "carbs": 27.0, "fat": 0.4},
 
             # Lunch
-            {
-                'name': 'Cơm gạo lứt gà nướng',
-                'description': 'Cơm gạo lứt với ức gà nướng và rau xanh',
-                'meal_type': 'lunch',
-                'calories': 480,
-                'protein': 35,
-                'carbs': 55,
-                'fat': 10,
-                'recipe': '1. 150g cơm gạo lứt\n2. 120g ức gà nướng\n3. Rau xà lách, cà chua, dưa leo\n4. Nước sốt mè rang'
-            },
-            {
-                'name': 'Bún cá hồi',
-                'description': 'Bún với cá hồi nướng và rau thơm',
-                'meal_type': 'lunch',
-                'calories': 520,
-                'protein': 32,
-                'carbs': 62,
-                'fat': 14,
-                'recipe': '1. 150g bún\n2. 130g cá hồi nướng\n3. Rau thơm, bắp cải, cà rót\n4. Nước mắm pha'
-            },
-            {
-                'name': 'Salad ức gà quinoa',
-                'description': 'Salad dinh dưỡng với ức gà và quinoa',
-                'meal_type': 'lunch',
-                'calories': 420,
-                'protein': 30,
-                'carbs': 42,
-                'fat': 12,
-                'recipe': '1. 80g quinoa nấu chín\n2. 100g ức gà luộc\n3. Rau xà lách, cà chua bi, dưa leo\n4. Nước sốt dầu olive chanh'
-            },
+            {"name": "Ức gà nướng", "meal_type": "lunch",
+             "calories": 165, "protein": 31.0, "carbs": 0.0, "fat": 3.6},
+            {"name": "Cơm gạo lứt", "meal_type": "lunch",
+             "calories": 111, "protein": 2.6, "carbs": 23.0, "fat": 0.9},
+            {"name": "Súp lơ xanh", "meal_type": "lunch",
+             "calories": 34, "protein": 2.8, "carbs": 7.0, "fat": 0.4},
+            {"name": "Cà rót", "meal_type": "lunch",
+             "calories": 41, "protein": 0.9, "carbs": 10.0, "fat": 0.2},
+            {"name": "Rau bina", "meal_type": "lunch",
+             "calories": 23, "protein": 2.9, "carbs": 3.6, "fat": 0.4},
 
             # Dinner
-            {
-                'name': 'Cá thu nướng rau củ',
-                'description': 'Cá thu nướng với rau củ hấp',
-                'meal_type': 'dinner',
-                'calories': 380,
-                'protein': 32,
-                'carbs': 28,
-                'fat': 14,
-                'recipe': '1. 150g cá thu\n2. Súp lơ, cà rốt, đậu Hà Lan hấp\n3. Khoai lang luộc'
-            },
-            {
-                'name': 'Tôm xào bông cải xanh',
-                'description': 'Tôm xào với bông cải xanh và gạo lứt',
-                'meal_type': 'dinner',
-                'calories': 360,
-                'protein': 28,
-                'carbs': 45,
-                'fat': 8,
-                'recipe': '1. 120g tôm\n2. 200g bông cải xanh\n3. 100g cơm gạo lứt\n4. Tỏi, gừng'
-            },
-            {
-                'name': 'Súp gà nấm',
-                'description': 'Súp gà với nấm và rau củ',
-                'meal_type': 'dinner',
-                'calories': 280,
-                'protein': 24,
-                'carbs': 32,
-                'fat': 6,
-                'recipe': '1. 100g ức gà\n2. Nấm, cà rốt, hành tây\n3. Rau cần\n4. Tiêu, muối'
-            },
+            {"name": "Cá hồi nướng", "meal_type": "dinner",
+             "calories": 208, "protein": 20.0, "carbs": 0.0, "fat": 13.0},
+            {"name": "Khoai lang", "meal_type": "dinner",
+             "calories": 86, "protein": 1.6, "carbs": 20.0, "fat": 0.1},
+            {"name": "Đậu phụ", "meal_type": "dinner",
+             "calories": 76, "protein": 8.0, "carbs": 1.9, "fat": 4.8},
+            {"name": "Quinoa", "meal_type": "dinner",
+             "calories": 120, "protein": 4.4, "carbs": 21.3, "fat": 1.92},
+            {"name": "Ớt chuông", "meal_type": "dinner",
+             "calories": 31, "protein": 1.0, "carbs": 6.0, "fat": 0.3},
 
             # Snacks
-            {
-                'name': 'Chuối đậu phộng',
-                'description': 'Chuối với bơ đậu phộng',
-                'meal_type': 'snack',
-                'calories': 200,
-                'protein': 6,
-                'carbs': 30,
-                'fat': 8,
-                'recipe': '1. 1 quả chuối\n2. 1 thìa bơ đậu phộng'
-            },
-            {
-                'name': 'Hạnh nhân sữa chua',
-                'description': 'Sữa chua Hy Lạp với hạnh nhân',
-                'meal_type': 'snack',
-                'calories': 180,
-                'protein': 12,
-                'carbs': 15,
-                'fat': 8,
-                'recipe': '1. 150g sữa chua Hy Lạp\n2. 15g hạnh nhân\n3. Ít mật ong'
-            },
-            {
-                'name': 'Táo hạt điều',
-                'description': 'Táo cắt lát với hạt điều',
-                'meal_type': 'snack',
-                'calories': 160,
-                'protein': 4,
-                'carbs': 22,
-                'fat': 7,
-                'recipe': '1. 1 quả táo\n2. 10 hạt điều'
-            },
+            {"name": "Hạnh nhân", "meal_type": "snack",
+             "calories": 164, "protein": 6.0, "carbs": 6.0, "fat": 14.0},
+            {"name": "Táo", "meal_type": "snack",
+             "calories": 95, "protein": 0.5, "carbs": 25.0, "fat": 0.3},
+            {"name": "Quả việt quất", "meal_type": "snack",
+             "calories": 57, "protein": 0.7, "carbs": 14.5, "fat": 0.3},
+            {"name": "Bơ", "meal_type": "snack",
+             "calories": 160, "protein": 2.0, "carbs": 8.5, "fat": 14.7},
+            {"name": "Dầu ô liu", "meal_type": "snack",
+             "calories": 119, "protein": 0.0, "carbs": 0.0, "fat": 13.5},
         ]
 
+        foods = []
         for data in foods_data:
-            Food.objects.get_or_create(**data)
+            food, created = Food.objects.get_or_create(
+                name=data["name"],
+                defaults=data
+            )
+            foods.append(food)
 
-        self.stdout.write('✓ Created foods')
+        return foods
 
-    def create_health_profiles(self):
-        users = User.objects.filter(role='user')
-        trainer = User.objects.filter(role='trainer').first()
-        nutritionist = User.objects.filter(role='nutritionist').first()
+    def create_nutrition_plans(self, users, nutritionists):
+        """Create sample nutrition plans by nutritionists for users"""
+        from datetime import date, timedelta
 
-        profiles_data = [
+        plans_data = [
             {
-                'user': users[0],
-                'height': 170,
-                'weight': 75,
-                'age': 28,
-                'goal': 'lose_weight',
-                'target_weight': 68,
-                'expert': trainer
+                "name": "Kế hoạch tăng cơ",
+                "description": "Thực đơn giàu protein cho người tập gym tăng cơ",
+                "goal": "gain_muscle",
+                "daily_calories": 2500,
+                "user": users[0] if users else None,
+                "created_by": nutritionists[0] if nutritionists else None,
+                "start_date": date.today(),
+                "end_date": date.today() + timedelta(weeks=8)
             },
             {
-                'user': users[1],
-                'height': 165,
-                'weight': 55,
-                'age': 25,
-                'goal': 'gain_muscle',
-                'target_weight': 60,
-                'expert': nutritionist
+                "name": "Kế hoạch giảm cân",
+                "description": "Thực đơn ít calo để giảm cân hiệu quả",
+                "goal": "lose_weight",
+                "daily_calories": 1500,
+                "user": users[1] if len(users) > 1 else users[0],
+                "created_by": nutritionists[1] if len(nutritionists) > 1 else nutritionists[0],
+                "start_date": date.today(),
+                "end_date": date.today() + timedelta(weeks=12)
             },
             {
-                'user': users[2],
-                'height': 178,
-                'weight': 72,
-                'age': 30,
-                'goal': 'maintain',
-                'target_weight': 72,
-                'expert': trainer
+                "name": "Kế hoạch duy trì",
+                "description": "Thực đơn cân bằng để duy trì cân nặng",
+                "goal": "maintain",
+                "daily_calories": 2000,
+                "user": users[2] if len(users) > 2 else users[0],
+                "created_by": nutritionists[0] if nutritionists else None,
+                "start_date": date.today(),
+                "end_date": date.today() + timedelta(weeks=8)
+            },
+            {
+                "name": "Thực đơn Eat Clean",
+                "description": "Thực đơn sạch cho sức khỏe tổng thể",
+                "goal": "maintain",
+                "daily_calories": 1800,
+                "user": users[3] if len(users) > 3 else users[0],
+                "created_by": nutritionists[1] if len(nutritionists) > 1 else nutritionists[0],
+                "start_date": date.today(),
+                "end_date": date.today() + timedelta(weeks=8)
             },
         ]
 
-        for data in profiles_data:
-            HealthProfile.objects.get_or_create(**data)
+        nutrition_plans = []
+        for data in plans_data:
+            plan, created = NutritionPlan.objects.get_or_create(
+                name=data["name"],
+                user=data["user"],
+                defaults=data
+            )
+            nutrition_plans.append(plan)
 
-        self.stdout.write('✓ Created health profiles')
+        return nutrition_plans
 
-    def create_workout_plans(self):
-        users = User.objects.filter(role='user')
-        trainer = User.objects.filter(role='trainer').first()
+    def create_meal_schedules(self, nutrition_plans, foods):
+        """Create meal schedules for nutrition plans"""
+        food_dict = {f.name: f for f in foods}
 
-        # Plan 1: Giảm cân
-        plan1, _ = WorkoutPlan.objects.get_or_create(
-            user=users[0],
-            name='Kế hoạch giảm cân 4 tuần',
-            goal='lose_weight',
-            description='Kế hoạch tập luyện giúp giảm cân hiệu quả với cardio và HIIT',
-            start_date=date.today(),
-            end_date=date.today() + timedelta(days=28),
-            created_by=trainer
-        )
+        # Mapping nutrition plans to foods for each weekday
+        # weekday: 0-6 (Thứ 2 đến Chủ nhật)
+        meal_mapping = {
+            "Kế hoạch tăng cơ": {
+                0: ["Yến mạch", "Trứng luộc", "Ức gà nướng", "Cơm gạo lứt", "Cá hồi nướng"],
+                1: ["Trứng luộc", "Chuối", "Ức gà nướng", "Súp lơ xanh", "Khoai lang"],
+                2: ["Yến mạch", "Chuối", "Cơm gạo lứt", "Cà rót", "Cá hồi nướng"],
+                3: ["Trứng luộc", "Ức gà nướng", "Cơm gạo lứt", "Khoai lang", "Hạnh nhân"],
+                4: ["Yến mạch", "Chuối", "Ức gà nướng", "Súp lơ xanh", "Cá hồi nướng"],
+                5: ["Trứng luộc", "Cơm gạo lứt", "Cà rót", "Khoai lang", "Bơ"],
+                6: ["Yến mạch", "Ức gà nướng", "Cá hồi nướng", "Ớt chuông", "Hạnh nhân"]
+            },
+            "Kế hoạch giảm cân": {
+                0: ["Yến mạch", "Chuối", "Ức gà nướng", "Rau bina", "Đậu phụ"],
+                1: ["Yến mạch", "Ức gà nướng", "Cà rót", "Quinoa", "Táo"],
+                2: ["Chuối", "Ức gà nướng", "Rau bina", "Đậu phụ", "Quả việt quất"],
+                3: ["Yến mạch", "Rau bina", "Cà rót", "Quinoa", "Táo"],
+                4: ["Chuối", "Ức gà nướng", "Đậu phụ", "Súp lơ xanh", "Quả việt quất"],
+                5: ["Yến mạch", "Ức gà nướng", "Rau bina", "Quinoa", "Táo"],
+                6: ["Chuối", "Đậu phụ", "Súp lơ xanh", "Quả việt quất"]
+            },
+            "Kế hoạch duy trì": {
+                0: ["Trứng luộc", "Bánh mì nguyên cám", "Ức gà nướng", "Cơm gạo lứt", "Cá hồi nướng"],
+                1: ["Trứng luộc", "Chuối", "Cơm gạo lứt", "Rau bina", "Khoai lang"],
+                2: ["Bánh mì nguyên cám", "Ức gà nướng", "Cơm gạo lứt", "Cá hồi nướng", "Hạnh nhân"],
+                3: ["Trứng luộc", "Chuối", "Rau bina", "Khoai lang", "Táo"],
+                4: ["Bánh mì nguyên cám", "Ức gà nướng", "Cơm gạo lứt", "Súp lơ xanh", "Cá hồi nướng"],
+                5: ["Trứng luộc", "Chuối", "Rau bina", "Khoai lang", "Hạnh nhân"],
+                6: ["Ức gà nướng", "Cá hồi nướng", "Súp lơ xanh", "Táo"]
+            },
+            "Thực đơn Eat Clean": {
+                0: ["Yến mạch", "Sữa chua Hy Lạp", "Ức gà nướng", "Quinoa", "Đậu phụ"],
+                1: ["Sữa chua Hy Lạp", "Quả việt quất", "Quinoa", "Rau bina", "Khoai lang"],
+                2: ["Yến mạch", "Ức gà nướng", "Quinoa", "Cà rót", "Đậu phụ"],
+                3: ["Sữa chua Hy Lạp", "Quả việt quất", "Rau bina", "Khoai lang", "Hạnh nhân"],
+                4: ["Yến mạch", "Ức gà nướng", "Quinoa", "Cà rót", "Ớt chuông"],
+                5: ["Sữa chua Hy Lạp", "Đậu phụ", "Rau bina", "Khoai lang", "Táo"],
+                6: ["Yến mạch", "Quả việt quất", "Quinoa", "Ớt chuông", "Hạnh nhân"]
+            }
+        }
 
-        # Schedules for Plan 1
-        schedules_plan1 = [
-            {'exercise': Exercise.objects.get(name='Chạy bộ'), 'weekday': 0, 'sets': 1, 'reps': 1},
-            {'exercise': Exercise.objects.get(name='Burpees'), 'weekday': 0, 'sets': 3, 'reps': 10},
-            {'exercise': Exercise.objects.get(name='Nhảy dây'), 'weekday': 2, 'sets': 1, 'reps': 1},
-            {'exercise': Exercise.objects.get(name='Mountain Climbers'), 'weekday': 2, 'sets': 4, 'reps': 15},
-            {'exercise': Exercise.objects.get(name='Đạp xe'), 'weekday': 4, 'sets': 1, 'reps': 1},
-            {'exercise': Exercise.objects.get(name='Plank'), 'weekday': 4, 'sets': 3, 'reps': 1},
+        for plan in nutrition_plans:
+            if plan.name in meal_mapping:
+                for weekday, food_names in meal_mapping[plan.name].items():
+                    for food_name in food_names:
+                        if food_name in food_dict:
+                            MealSchedule.objects.get_or_create(
+                                nutrition_plan=plan,
+                                weekday=weekday,
+                                food=food_dict[food_name],
+                                defaults={
+                                    "portion": round(random.uniform(0.8, 1.5), 1)
+                                }
+                            )
+
+    def create_daily_tracking(self, users):
+        """Create daily tracking records for users"""
+        for user in users:
+            # Create tracking for the past 30 days
+            for i in range(30):
+                date = timezone.now().date() - timedelta(days=i)
+                base_weight = user.health_profile.weight
+
+                DailyTracking.objects.create(
+                    user=user,
+                    date=date,
+                    weight=round(base_weight + random.uniform(-0.5, 0.5), 1),
+                    water_intake=random.randint(1500, 3000),
+                    steps=random.randint(3000, 15000),
+                    heart_rate=random.randint(60, 90),
+                )
+
+    def create_progress_records(self, users):
+        """Create progress records for users"""
+        for user in users:
+            # Create progress records for the past 90 days (weekly)
+            for i in range(0, 90, 7):
+                date = timezone.now().date() - timedelta(days=i)
+                base_weight = user.health_profile.weight
+
+                Progress.objects.create(
+                    user=user,
+                    date=date,
+                    weight=round(base_weight + random.uniform(-2.0, 2.0), 1),
+                    body_fat=round(random.uniform(15.0, 25.0), 1),
+                    muscle_mass=round(random.uniform(30.0, 45.0), 1),
+                    notes=random.choice([
+                        "Cảm thấy khỏe hơn",
+                        "Đang tiến bộ tốt",
+                        "Cần cố gắng thêm",
+                        "Rất hài lòng với kết quả",
+                        ""
+                    ])
+                )
+
+    def create_consultations(self, users, nutritionists, trainers):
+        """Create consultation appointments"""
+        experts = nutritionists + trainers
+
+        for user in users:
+            # Create 2-4 consultations per user
+            for _ in range(random.randint(2, 4)):
+                expert = random.choice(experts)
+                days_offset = random.randint(-30, 30)
+                appointment_date = timezone.now() + timedelta(days=days_offset)
+
+                status = "pending" if days_offset > 0 else random.choice(["confirmed", "confirmed", "cancelled"])
+
+                Consultation.objects.create(
+                    user=user,
+                    expert=expert,
+                    appointment_date=appointment_date,
+                    status=status,
+                    notes=random.choice([
+                        "Tư vấn chế độ ăn uống",
+                        "Điều chỉnh kế hoạch tập luyện",
+                        "Kiểm tra tiến độ",
+                        "Tư vấn bổ sung dinh dưỡng",
+                        ""
+                    ]) if status == "confirmed" else "",
+                    feedback=random.choice([
+                        "Rất hữu ích",
+                        "Chuyên gia tận tình",
+                        "Nhận được nhiều lời khuyên hữu ích",
+                        ""
+                    ]) if status == "confirmed" else ""
+                )
+
+    def create_reminders(self, users):
+        """Create reminders for users"""
+        from datetime import time
+
+        reminder_data = [
+            ("Uống nước đủ", "water", "Nhớ uống đủ 2 lít nước mỗi ngày", [0, 1, 2, 3, 4, 5, 6]),
+            ("Tập luyện buổi sáng", "exercise", "Đến giờ tập luyện rồi!", [0, 2, 4]),
+            ("Tập luyện buổi tối", "exercise", "Đừng quên tập thể dục nhé!", [1, 3, 5]),
+            ("Ăn bữa phụ", "meal", "Đã đến giờ ăn bữa phụ", [0, 1, 2, 3, 4]),
+            ("Nghỉ ngơi", "rest", "Hãy nghỉ ngơi và thư giãn", [6]),
+            ("Uống thuốc", "medicine", "Nhớ uống thuốc theo đơn", [0, 1, 2, 3, 4, 5, 6]),
         ]
 
-        for sched in schedules_plan1:
-            WorkoutSchedule.objects.get_or_create(
-                workout_plan=plan1,
-                **sched
-            )
+        for user in users:
+            # Create 3-5 reminders per user
+            for _ in range(random.randint(3, 5)):
+                title, reminder_type, message, days = random.choice(reminder_data)
 
-        # Plan 2: Tăng cơ
-        plan2, _ = WorkoutPlan.objects.get_or_create(
-            user=users[1],
-            name='Kế hoạch tăng cơ 6 tuần',
-            goal='gain_muscle',
-            description='Kế hoạch tập luyện tăng cường sức mạnh và khối lượng cơ',
-            start_date=date.today(),
-            end_date=date.today() + timedelta(days=42),
-            created_by=trainer
-        )
+                Reminder.objects.create(
+                    user=user,
+                    title=title,
+                    reminder_type=reminder_type,
+                    message=message,
+                    time=time(
+                        hour=random.randint(6, 21),
+                        minute=random.choice([0, 15, 30, 45])
+                    ),
+                    days_of_week=days,
+                    is_enabled=random.choice([True, True, True, False])
+                )
 
-        schedules_plan2 = [
-            {'exercise': Exercise.objects.get(name='Push-up (Chống đẩy)'), 'weekday': 0, 'sets': 4, 'reps': 15},
-            {'exercise': Exercise.objects.get(name='Squat (Gánh tạ)'), 'weekday': 0, 'sets': 4, 'reps': 20},
-            {'exercise': Exercise.objects.get(name='Lunges'), 'weekday': 2, 'sets': 3, 'reps': 12},
-            {'exercise': Exercise.objects.get(name='Plank'), 'weekday': 2, 'sets': 3, 'reps': 1},
-            {'exercise': Exercise.objects.get(name='Push-up (Chống đẩy)'), 'weekday': 4, 'sets': 4, 'reps': 15},
-            {'exercise': Exercise.objects.get(name='Squat (Gánh tạ)'), 'weekday': 4, 'sets': 4, 'reps': 20},
-        ]
+    def create_health_journals(self, users):
+        """Create health journal entries"""
+        moods = ["great", "good", "normal", "tired", "bad"]
 
-        for sched in schedules_plan2:
-            WorkoutSchedule.objects.get_or_create(
-                workout_plan=plan2,
-                **sched
-            )
+        for user in users:
+            # Create 10-20 journal entries per user for different dates
+            num_entries = random.randint(10, 20)
+            # Generate unique dates for this user
+            dates_used = set()
+            for _ in range(num_entries):
+                # Try to find a unique date
+                attempts = 0
+                while attempts < 100:
+                    days_ago = random.randint(0, 60)
+                    entry_date = (timezone.now() - timedelta(days=days_ago)).date()
+                    if entry_date not in dates_used:
+                        dates_used.add(entry_date)
+                        break
+                    attempts += 1
 
-        # Plan 3: Duy trì
-        plan3, _ = WorkoutPlan.objects.get_or_create(
-            user=users[2],
-            name='Kế hoạch duy trì sức khỏe',
-            goal='maintain',
-            description='Kế hoạch cân bằng giữa cardio và strength training',
-            start_date=date.today(),
-            end_date=date.today() + timedelta(days=30),
-            created_by=trainer
-        )
+                if attempts >= 100:
+                    continue  # Skip if can't find unique date
 
-        schedules_plan3 = [
-            {'exercise': Exercise.objects.get(name='Chạy bộ'), 'weekday': 1, 'sets': 1, 'reps': 1},
-            {'exercise': Exercise.objects.get(name='Push-up (Chống đẩy)'), 'weekday': 1, 'sets': 3, 'reps': 15},
-            {'exercise': Exercise.objects.get(name='Sun Salutation (Chào mặt trời)'), 'weekday': 3, 'sets': 5,
-             'reps': 1},
-            {'exercise': Exercise.objects.get(name='Squat (Gánh tạ)'), 'weekday': 5, 'sets': 3, 'reps': 20},
-            {'exercise': Exercise.objects.get(name='Đạp xe'), 'weekday': 5, 'sets': 1, 'reps': 1},
-        ]
+                HealthJournal.objects.get_or_create(
+                    user=user,
+                    date=entry_date,
+                    defaults={
+                        "title": random.choice([
+                            "Ngày tập luyện tốt",
+                            "Cảm thấy mệt mỏi",
+                            "Tiến bộ rõ rệt",
+                            "Ngày bình thường",
+                            "Cần điều chỉnh kế hoạch"
+                        ]),
+                        "content": random.choice([
+                            "Hôm nay tập luyện rất tốt!",
+                            "Cảm thấy mệt mỏi sau ngày làm việc",
+                            "Ăn uống lành mạnh cả ngày",
+                            "Đạt được mục tiêu bước đi hôm nay",
+                            "Cần nghỉ ngơi nhiều hơn",
+                            "Rất hài lòng với tiến độ của mình",
+                            "Ngủ không đủ giấc",
+                            "Tâm trạng tốt, năng lượng dồi dào",
+                        ]),
+                        "mood": random.choice(moods),
+                        "workout_completed": random.choice([True, False]),
+                        "workout_notes": random.choice([
+                            "Hoàn thành tốt",
+                            "Hơi vất vả",
+                            "Cần cải thiện kỹ thuật",
+                            ""
+                        ]) if random.choice([True, False]) else "",
+                        "energy_level": random.randint(1, 10),
+                        "sleep_hours": round(random.uniform(5.5, 9.0), 1)
+                    }
+                )
 
-        for sched in schedules_plan3:
-            WorkoutSchedule.objects.get_or_create(
-                workout_plan=plan3,
-                **sched
-            )
+    def create_chat_rooms_and_messages(self, users, nutritionists, trainers):
+        """Create chat rooms and messages between users and experts"""
+        experts = nutritionists + trainers
 
-        self.stdout.write('✓ Created workout plans')
+        for user in users:
+            # Each user has 1-2 chat rooms with experts
+            num_chats = random.randint(1, 2)
+            selected_experts = random.sample(experts, min(num_chats, len(experts)))
 
-    def create_nutrition_plans(self):
-        users = User.objects.filter(role='user')
-        nutritionist = User.objects.filter(role='nutritionist').first()
+            for expert in selected_experts:
+                chat_room = ChatRoom.objects.create(
+                    user=user,
+                    expert=expert
+                )
 
-        # Plan 1: Giảm cân
-        nplan1, _ = NutritionPlan.objects.get_or_create(
-            user=users[0],
-            name='Thực đơn giảm cân lành mạnh',
-            goal='lose_weight',
-            description='Thực đơn 1600 calories/ngày giúp giảm cân an toàn',
-            daily_calories=1600,
-            start_date=date.today(),
-            end_date=date.today() + timedelta(days=28),
-            created_by=nutritionist
-        )
+                # Create 5-15 messages in each chat room
+                num_messages = random.randint(5, 15)
+                for i in range(num_messages):
+                    is_from_user = i % 2 == 0
 
-        # Meals for Plan 1 (Giảm cân)
-        meals_plan1 = [
-            # Thứ 2
-            {'food': Food.objects.get(name='Yến mạch sữa chua'), 'weekday': 0, 'portion': 1.0},
-            {'food': Food.objects.get(name='Salad ức gà quinoa'), 'weekday': 0, 'portion': 1.0},
-            {'food': Food.objects.get(name='Cá thu nướng rau củ'), 'weekday': 0, 'portion': 1.0},
-            {'food': Food.objects.get(name='Táo hạt điều'), 'weekday': 0, 'portion': 1.0},
+                    if is_from_user:
+                        message_texts = [
+                            "Chào anh/chị, em cần tư vấn về chế độ tập luyện",
+                            "Em đã làm theo hướng dẫn và thấy hiệu quả rõ rệt",
+                            "Tuần này em bị bận nên chưa tập được nhiều",
+                            "Em muốn hỏi về chế độ ăn uống phù hợp",
+                            "Cảm ơn anh/chị rất nhiều!",
+                            "Em đã đạt được mục tiêu giảm 2kg rồi ạ",
+                            "Bài tập hôm qua hơi khó với em",
+                        ]
+                    else:
+                        message_texts = [
+                            "Chào em, anh/chị sẵn sàng tư vấn cho em",
+                            "Tuyệt vời! Hãy tiếp tục nỗ lực nhé",
+                            "Không sao, em cứ tập theo khả năng của mình",
+                            "Anh/chị sẽ gửi cho em thực đơn phù hợp",
+                            "Rất vui khi được hỗ trợ em!",
+                            "Chúc mừng em! Đó là kết quả đáng khích lệ",
+                            "Em hãy giảm độ khó xuống một chút, từ từ sẽ quen",
+                        ]
 
-            # Thứ 3
-            {'food': Food.objects.get(name='Trứng chiên rau củ'), 'weekday': 1, 'portion': 1.0},
-            {'food': Food.objects.get(name='Bún cá hồi'), 'weekday': 1, 'portion': 0.8},
-            {'food': Food.objects.get(name='Súp gà nấm'), 'weekday': 1, 'portion': 1.2},
-            {'food': Food.objects.get(name='Hạnh nhân sữa chua'), 'weekday': 1, 'portion': 1.0},
-
-            # Thứ 4
-            {'food': Food.objects.get(name='Bánh mì nguyên cám bơ trứng'), 'weekday': 2, 'portion': 1.0},
-            {'food': Food.objects.get(name='Cơm gạo lứt gà nướng'), 'weekday': 2, 'portion': 0.8},
-            {'food': Food.objects.get(name='Tôm xào bông cải xanh'), 'weekday': 2, 'portion': 1.0},
-            {'food': Food.objects.get(name='Chuối đậu phộng'), 'weekday': 2, 'portion': 1.0},
-
-            # Thứ 5
-            {'food': Food.objects.get(name='Yến mạch sữa chua'), 'weekday': 3, 'portion': 1.0},
-            {'food': Food.objects.get(name='Salad ức gà quinoa'), 'weekday': 3, 'portion': 1.0},
-            {'food': Food.objects.get(name='Cá thu nướng rau củ'), 'weekday': 3, 'portion': 1.0},
-            {'food': Food.objects.get(name='Táo hạt điều'), 'weekday': 3, 'portion': 1.0},
-
-            # Thứ 6
-            {'food': Food.objects.get(name='Trứng chiên rau củ'), 'weekday': 4, 'portion': 1.0},
-            {'food': Food.objects.get(name='Bún cá hồi'), 'weekday': 4, 'portion': 0.8},
-            {'food': Food.objects.get(name='Súp gà nấm'), 'weekday': 4, 'portion': 1.2},
-            {'food': Food.objects.get(name='Hạnh nhân sữa chua'), 'weekday': 4, 'portion': 1.0},
-        ]
-
-        for meal in meals_plan1:
-            MealSchedule.objects.get_or_create(
-                nutrition_plan=nplan1,
-                **meal
-            )
-
-        # Plan 2: Tăng cơ
-        nplan2, _ = NutritionPlan.objects.get_or_create(
-            user=users[1],
-            name='Thực đơn tăng cơ cao protein',
-            goal='gain_muscle',
-            description='Thực đơn 2200 calories/ngày giàu protein',
-            daily_calories=2200,
-            start_date=date.today(),
-            end_date=date.today() + timedelta(days=42),
-            created_by=nutritionist
-        )
-
-        meals_plan2 = [
-            # Thứ 2
-            {'food': Food.objects.get(name='Yến mạch sữa chua'), 'weekday': 0, 'portion': 1.2},
-            {'food': Food.objects.get(name='Cơm gạo lứt gà nướng'), 'weekday': 0, 'portion': 1.2},
-            {'food': Food.objects.get(name='Tôm xào bông cải xanh'), 'weekday': 0, 'portion': 1.5},
-            {'food': Food.objects.get(name='Chuối đậu phộng'), 'weekday': 0, 'portion': 1.5},
-            {'food': Food.objects.get(name='Hạnh nhân sữa chua'), 'weekday': 0, 'portion': 1.0},
-
-            # Thứ 3
-            {'food': Food.objects.get(name='Trứng chiên rau củ'), 'weekday': 1, 'portion': 1.5},
-            {'food': Food.objects.get(name='Bún cá hồi'), 'weekday': 1, 'portion': 1.2},
-            {'food': Food.objects.get(name='Cá thu nướng rau củ'), 'weekday': 1, 'portion': 1.3},
-            {'food': Food.objects.get(name='Táo hạt điều'), 'weekday': 1, 'portion': 1.5},
-
-            # Thứ 4
-            {'food': Food.objects.get(name='Bánh mì nguyên cám bơ trứng'), 'weekday': 2, 'portion': 1.5},
-            {'food': Food.objects.get(name='Cơm gạo lứt gà nướng'), 'weekday': 2, 'portion': 1.2},
-            {'food': Food.objects.get(name='Tôm xào bông cải xanh'), 'weekday': 2, 'portion': 1.5},
-            {'food': Food.objects.get(name='Chuối đậu phộng'), 'weekday': 2, 'portion': 1.5},
-        ]
-
-        for meal in meals_plan2:
-            MealSchedule.objects.get_or_create(
-                nutrition_plan=nplan2,
-                **meal
-            )
-
-        # Plan 3: Duy trì
-        nplan3, _ = NutritionPlan.objects.get_or_create(
-            user=users[2],
-            name='Thực đơn cân bằng',
-            goal='maintain',
-            description='Thực đơn 1900 calories/ngày duy trì sức khỏe',
-            daily_calories=1900,
-            start_date=date.today(),
-            end_date=date.today() + timedelta(days=30),
-            created_by=nutritionist
-        )
-
-        meals_plan3 = [
-            # Thứ 2
-            {'food': Food.objects.get(name='Yến mạch sữa chua'), 'weekday': 0, 'portion': 1.0},
-            {'food': Food.objects.get(name='Cơm gạo lứt gà nướng'), 'weekday': 0, 'portion': 1.0},
-            {'food': Food.objects.get(name='Cá thu nướng rau củ'), 'weekday': 0, 'portion': 1.0},
-            {'food': Food.objects.get(name='Táo hạt điều'), 'weekday': 0, 'portion': 1.0},
-
-            # Thứ 3
-            {'food': Food.objects.get(name='Bánh mì nguyên cám bơ trứng'), 'weekday': 1, 'portion': 1.0},
-            {'food': Food.objects.get(name='Salad ức gà quinoa'), 'weekday': 1, 'portion': 1.0},
-            {'food': Food.objects.get(name='Tôm xào bông cải xanh'), 'weekday': 1, 'portion': 1.0},
-            {'food': Food.objects.get(name='Hạnh nhân sữa chua'), 'weekday': 1, 'portion': 1.0},
-
-            # Thứ 4
-            {'food': Food.objects.get(name='Trứng chiên rau củ'), 'weekday': 2, 'portion': 1.0},
-            {'food': Food.objects.get(name='Bún cá hồi'), 'weekday': 2, 'portion': 1.0},
-            {'food': Food.objects.get(name='Súp gà nấm'), 'weekday': 2, 'portion': 1.0},
-            {'food': Food.objects.get(name='Chuối đậu phộng'), 'weekday': 2, 'portion': 1.0},
-        ]
-
-        for meal in meals_plan3:
-            MealSchedule.objects.get_or_create(
-                nutrition_plan=nplan3,
-                **meal
-            )
-
-        self.stdout.write('✓ Created nutrition plans')
+                    Message.objects.create(
+                        chat_room=chat_room,
+                        sender=user if is_from_user else expert,
+                        content=random.choice(message_texts)
+                    )

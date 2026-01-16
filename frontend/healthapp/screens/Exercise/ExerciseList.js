@@ -1,9 +1,10 @@
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, RefreshControl } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, Image, RefreshControl } from "react-native";
 import { Searchbar, Card, Chip, ActivityIndicator } from "react-native-paper";
 import { useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { authApis, endpoints, BASE_URL } from "../../utils/Apis";
+import styles from "../../styles/screens/Exercise/ExerciseListStyles";
 
 const ExerciseList = () => {
     const [exercises, setExercises] = useState([]);
@@ -18,11 +19,9 @@ const ExerciseList = () => {
         try {
             const token = await AsyncStorage.getItem('token');
             if (token) {
-                // Load categories
                 const catRes = await authApis(token).get(endpoints['exercise_categories']);
                 setCategories(catRes.data);
 
-                // Load exercises
                 let params = {};
                 if (selectedCategory) params.category_id = selectedCategory;
                 if (searchQuery) params.search = searchQuery;
@@ -130,12 +129,10 @@ const ExerciseList = () => {
 
     return (
         <View style={styles.container}>
-            {/* Header */}
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Bài Tập</Text>
             </View>
 
-            {/* Search */}
             <View style={styles.searchContainer}>
                 <Searchbar
                     placeholder="Tìm bài tập..."
@@ -145,7 +142,6 @@ const ExerciseList = () => {
                 />
             </View>
 
-            {/* Categories */}
             <View style={styles.categoriesContainer}>
                 <FlatList
                     horizontal
@@ -165,7 +161,6 @@ const ExerciseList = () => {
                 />
             </View>
 
-           
             <FlatList
                 data={exercises}
                 renderItem={renderExercise}
@@ -183,115 +178,5 @@ const ExerciseList = () => {
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#f5f5f5',
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    header: {
-        backgroundColor: '#3b5998',
-        padding: 20,
-        paddingTop: 50,
-    },
-    headerTitle: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#ffffff',
-    },
-    searchContainer: {
-        padding: 15,
-        backgroundColor: '#ffffff',
-    },
-    searchBar: {
-        elevation: 0,
-        backgroundColor: '#f5f5f5',
-    },
-    categoriesContainer: {
-        paddingHorizontal: 15,
-        paddingVertical: 10,
-        backgroundColor: '#ffffff',
-    },
-    categoryChip: {
-        marginRight: 8,
-    },
-    categoryText: {
-        fontSize: 14,
-    },
-    listContainer: {
-        padding: 15,
-    },
-    exerciseCard: {
-        flexDirection: 'row',
-        backgroundColor: '#ffffff',
-        borderRadius: 12,
-        marginBottom: 15,
-        overflow: 'hidden',
-        elevation: 2,
-    },
-    exerciseImage: {
-        width: 120,
-        height: 120,
-        backgroundColor: '#e0e0e0',
-    },
-    exerciseInfo: {
-        flex: 1,
-        padding: 12,
-        justifyContent: 'space-between',
-    },
-    exerciseName: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#333',
-        marginBottom: 4,
-    },
-    exerciseCategory: {
-        fontSize: 13,
-        color: '#666',
-        marginBottom: 8,
-    },
-    exerciseMeta: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    metaItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginRight: 15,
-    },
-    metaIcon: {
-        fontSize: 14,
-        marginRight: 4,
-    },
-    metaText: {
-        fontSize: 13,
-        color: '#666',
-    },
-    difficultyBadge: {
-        paddingHorizontal: 8,
-        paddingVertical: 3,
-        borderRadius: 12,
-        marginLeft: 'auto',
-    },
-    difficultyText: {
-        fontSize: 11,
-        color: '#ffffff',
-        fontWeight: 'bold',
-    },
-    emptyContainer: {
-        padding: 40,
-        alignItems: 'center',
-    },
-    emptyText: {
-        fontSize: 16,
-        color: '#999',
-    },
-    
-});
 
 export default ExerciseList;

@@ -144,7 +144,6 @@ const ChatScreen = () => {
                 keyboardVerticalOffset={0}
             >
                 <View style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
-                    
                     <View
                         style={{
                             flexDirection: 'row',
@@ -188,7 +187,6 @@ const ChatScreen = () => {
                         </View>
                     </View>
 
-                    
                     <FlatList
                         ref={flatListRef}
                         data={[...messages].reverse()}
@@ -200,7 +198,6 @@ const ChatScreen = () => {
                         showsVerticalScrollIndicator={false}
                     />
 
-                    
                     <View
                         style={{
                             flexDirection: 'row',

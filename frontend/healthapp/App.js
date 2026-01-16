@@ -4,9 +4,10 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Icon } from "react-native-paper";
 import { MyUserContext } from "./utils/contexts/MyContext";
 import { useContext, useReducer, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import MyUserReducer from "./utils/reducers/MyUserReducer";
 import { Provider as PaperProvider } from "react-native-paper";
+import styles from "./styles/AppStyles";
 
 
 import Welcome from "./screens/Auth/Welcome";
@@ -36,13 +37,8 @@ import HealthProfile from "./screens/Profile/HealthProfile";
 import DailyTracking from "./screens/Profile/DailyTracking";
 import Progress from "./screens/Profile/Progress";
 
-import ExpertList from "./screens/Expert/ExpertList";
-
 import ReminderList from "./screens/Reminder/ReminderList";
 import CreateReminder from "./screens/Reminder/CreateReminder";
-
-import ClientList from "./screens/Expert/ClientList";
-import ClientProgress from "./screens/Expert/ClientProgress";
 
 import JournalList from "./screens/Journal/JournalList";
 import CreateJournal from "./screens/Journal/CreateJournal";
@@ -50,6 +46,10 @@ import JournalDetail from "./screens/Journal/JournalDetail";
 
 import ChatList from "./screens/Chat/ChatList";
 import ChatScreen from "./screens/Chat/ChatScreen";
+
+import ExpertList from "./screens/Expert/ExpertList";
+import ClientList from "./screens/Expert/ClientList";
+import ClientProgress from "./screens/Expert/ClientProgress";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -69,18 +69,18 @@ const PlansHome = ({ navigation }) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <View style={localStyles.tabsContainer}>
+      <View style={styles.tabsContainer}>
         <TouchableOpacity
-          style={[localStyles.tabButton, active === 'workout' && localStyles.activeTab]}
+          style={[styles.tabButton, active === 'workout' && styles.activeTab]}
           onPress={() => setActive('workout')}
         >
-          <Text style={localStyles.tabText}>Tập luyện</Text>
+          <Text style={styles.tabText}>Tập luyện</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[localStyles.tabButton, active === 'nutrition' && localStyles.activeTab]}
+          style={[styles.tabButton, active === 'nutrition' && styles.activeTab]}
           onPress={() => setActive('nutrition')}
         >
-          <Text style={localStyles.tabText}>Dinh dưỡng</Text>
+          <Text style={styles.tabText}>Dinh dưỡng</Text>
         </TouchableOpacity>
       </View>
 
@@ -115,16 +115,6 @@ const ProfileStack = () => (
   </Stack.Navigator>
 );
 
-const ExpertStack = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }}>
-    <Stack.Screen name="ExpertMain" component={ExpertList} />
-    <Stack.Screen name="ClientList" component={ClientList} />
-    <Stack.Screen name="ClientProgress" component={ClientProgress} />
-    <Stack.Screen name="ChatScreen" component={ChatScreen} />
-  </Stack.Navigator>
-);
-
-
 const JournalStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="JournalList" component={JournalList} />
@@ -133,6 +123,14 @@ const JournalStack = () => (
   </Stack.Navigator>
 );
 
+const ExpertStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="ExpertMain" component={ExpertList} />
+    <Stack.Screen name="ClientList" component={ClientList} />
+    <Stack.Screen name="ClientProgress" component={ClientProgress} />
+    <Stack.Screen name="ChatScreen" component={ChatScreen} />
+  </Stack.Navigator>
+);
 
 const MainTabNavigator = () => {
   return (
@@ -158,22 +156,22 @@ const MainTabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="Expert"
-        component={ExpertStack}
-        options={{
-          title: "Chuyên gia",
-          tabBarIcon: ({ color }) => (
-            <Icon source="doctor" color={color} size={24} />
-          ),
-        }}
-      />
-      <Tab.Screen
         name="Journal"
         component={JournalStack}
         options={{
           title: "Nhật ký",
           tabBarIcon: ({ color }) => (
             <Icon source="book-open-page-variant" color={color} size={24} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Expert"
+        component={ExpertStack}
+        options={{
+          title: "Chuyên gia",
+          tabBarIcon: ({ color }) => (
+            <Icon source="account-group" color={color} size={24} />
           ),
         }}
       />
@@ -187,7 +185,6 @@ const MainTabNavigator = () => {
           ),
         }}
       />
-      
     </Tab.Navigator>
   );
 };
@@ -225,26 +222,5 @@ const App = () => {
     </PaperProvider>
   );
 };
-
-const localStyles = StyleSheet.create({
-  tabsContainer: {
-    flexDirection: 'row',
-    paddingTop: 50,
-    backgroundColor: '#3b5998',
-  },
-  tabButton: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  activeTab: {
-    borderBottomWidth: 3,
-    borderBottomColor: '#ffd700',
-  },
-  tabText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-});
 
 export default App;

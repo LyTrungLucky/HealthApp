@@ -1,10 +1,10 @@
-
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, RefreshControl } from "react-native";
 import { FAB, Card, Chip, ActivityIndicator } from "react-native-paper";
 import { useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { authApis, endpoints } from "../../utils/Apis";
+import styles from "../../styles/screens/Exercise/WorkoutPlanStyles";
 
 const WorkoutPlan = () => {
     const [plans, setPlans] = useState([]);
@@ -28,7 +28,6 @@ const WorkoutPlan = () => {
     };
 
     useEffect(() => {
-        
         loadPlans();
         const unsubscribe = nav.addListener('focus', loadPlans);
         return unsubscribe;
@@ -113,7 +112,6 @@ const WorkoutPlan = () => {
 
     return (
         <View style={styles.container}>
-            
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Kế hoạch tập luyện</Text>
             </View>
@@ -137,7 +135,6 @@ const WorkoutPlan = () => {
                 }
             />
 
-           
             <FAB
                 style={styles.fab}
                 icon="plus"
@@ -146,108 +143,5 @@ const WorkoutPlan = () => {
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#f5f5f5',
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    header: {
-        backgroundColor: '#3b5998',
-        padding: 20,
-        paddingTop: 50,
-    },
-    headerTitle: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#ffffff',
-    },
-    listContainer: {
-        padding: 15,
-    },
-    planCard: {
-        marginBottom: 15,
-        elevation: 2,
-    },
-    planHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: 10,
-    },
-    planName: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#333',
-        flex: 1,
-        marginRight: 10,
-    },
-    goalChip: {
-        height: 28,
-    },
-    goalText: {
-        fontSize: 12,
-        color: '#ffffff',
-        fontWeight: 'bold',
-    },
-    planDescription: {
-        fontSize: 14,
-        color: '#666',
-        marginBottom: 15,
-        lineHeight: 20,
-    },
-    planMeta: {
-        marginBottom: 10,
-    },
-    metaItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 5,
-    },
-    metaIcon: {
-        fontSize: 16,
-        marginRight: 8,
-    },
-    metaText: {
-        fontSize: 13,
-        color: '#666',
-    },
-    createdBy: {
-        fontSize: 12,
-        color: '#999',
-        fontStyle: 'italic',
-    },
-    emptyContainer: {
-        padding: 40,
-        alignItems: 'center',
-    },
-    emptyIcon: {
-        fontSize: 64,
-        marginBottom: 15,
-    },
-    emptyText: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#666',
-        marginBottom: 8,
-    },
-    emptySubtext: {
-        fontSize: 14,
-        color: '#999',
-        textAlign: 'center',
-    },
-    fab: {
-        position: 'absolute',
-        margin: 16,
-        right: 0,
-        bottom: 0,
-        backgroundColor: '#3b5998',
-    },
-});
 
 export default WorkoutPlan;

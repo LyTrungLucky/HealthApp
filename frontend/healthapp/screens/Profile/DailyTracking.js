@@ -1,9 +1,10 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { TextInput, Button, ActivityIndicator } from "react-native-paper";
 import { useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { authApis, endpoints } from "../../utils/Apis";
+import styles from "../../styles/screens/Profile/DailyTrackingStyles";
 
 const DailyTracking = () => {
     const [tracking, setTracking] = useState(null);
@@ -159,58 +160,5 @@ const DailyTracking = () => {
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#f5f5f5',
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: '#3b5998',
-        padding: 15,
-        paddingTop: 50,
-    },
-    backButton: {
-        padding: 5,
-    },
-    backIcon: {
-        fontSize: 28,
-        color: '#ffffff',
-        fontWeight: 'bold',
-    },
-    headerTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#ffffff',
-    },
-    placeholder: {
-        width: 24,
-    },
-    content: {
-        flex: 1,
-    },
-    form: {
-        backgroundColor: '#ffffff',
-        margin: 15,
-        padding: 20,
-        borderRadius: 15,
-        elevation: 2,
-    },
-    input: {
-        marginBottom: 15,
-    },
-    saveButton: {
-        marginTop: 10,
-        paddingVertical: 8,
-    },
-});
 
 export default DailyTracking;

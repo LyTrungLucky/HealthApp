@@ -2,7 +2,6 @@ import { useContext, useRef, useState } from "react";
 import {
   View,
   TouchableOpacity,
-  StyleSheet,
   Modal,
   Pressable,
   Text,
@@ -11,6 +10,7 @@ import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Avatar } from "react-native-paper";
 import { MyUserContext } from "../utils/contexts/MyContext";
+import styles from "../styles/components/UserMenuStyles";
 
 const UserMenu = () => {
   const [visible, setVisible] = useState(false);
@@ -80,33 +80,5 @@ const UserMenu = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  avatar: {
-    backgroundColor: "#e4e6eb",
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  menu: {
-    position: "absolute",
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    paddingVertical: 8,
-    width: 200,
-    elevation: 8,
-    shadowColor: "#000",
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-  },
-  item: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-  },
-  text: {
-    fontSize: 16,
-  },
-});
 
 export default UserMenu;

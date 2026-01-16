@@ -1,14 +1,13 @@
-import { View, Text, StyleSheet, FlatList, Image, RefreshControl } from "react-native";
+import { View, Text, FlatList, Image, RefreshControl } from "react-native";
 import { Searchbar, Card, Chip, ActivityIndicator, Button } from "react-native-paper";
 import { useState, useEffect, useContext } from "react";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { authApis, endpoints } from "../../utils/Apis";
 import { MyUserContext } from "../../utils/contexts/MyContext";
+import styles from "../../styles/screens/Expert/ExpertListStyles";
 
 const ExpertList = () => {
-    
-
     const [experts, setExperts] = useState([]);
     const [selectedRole, setSelectedRole] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
@@ -22,7 +21,6 @@ const ExpertList = () => {
         { value: "nutritionist", label: "Dinh dưỡng" },
         { value: "trainer", label: "Huấn luyện viên" }
     ];
-
 
     const loadExperts = async () => {
         try {
@@ -38,7 +36,6 @@ const ExpertList = () => {
                 { params }
             );
             setExperts(res.data);
-
         } catch (err) {
             console.error(err);
         } finally {
@@ -64,7 +61,6 @@ const ExpertList = () => {
         loadExperts();
     };
 
-
     const getRoleLabel = (role) => {
         switch (role) {
             case 'nutritionist': return '🥗 Chuyên gia dinh dưỡng';
@@ -73,7 +69,6 @@ const ExpertList = () => {
         }
     };
 
-    
     const startChat = async (expertId) => {
         try {
             const token = await AsyncStorage.getItem('token');
@@ -85,7 +80,6 @@ const ExpertList = () => {
         }
     };
 
-   
     const isExpert = user?.role && ['nutritionist', 'trainer'].includes(user.role);
 
     const renderExpert = ({ item }) => (
@@ -109,11 +103,10 @@ const ExpertList = () => {
                         </Chip>
                     </View>
                 </View>
-                
-                
+
                 <View style={styles.buttonRow}>
-                    <Button 
-                        mode="contained" 
+                    <Button
+                        mode="contained"
                         style={[styles.actionButton, { backgroundColor: '#3b5998' }]}
                         onPress={() => startChat(item.id)}
                     >
@@ -137,7 +130,6 @@ const ExpertList = () => {
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Chuyên Gia</Text>
 
-                
                 {isExpert && (
                     <Button
                         mode="contained"
@@ -198,112 +190,5 @@ const ExpertList = () => {
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#f5f5f5',
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    header: {
-        backgroundColor: '#3b5998',
-        padding: 20,
-        paddingTop: 50,
-    },
-    headerTitle: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#ffffff',
-    },
-    clientsButton: {
-        marginTop: 12,
-        backgroundColor: '#ffffff',
-    },
-    clientsButtonText: {
-        color: '#3b5998',
-        fontWeight: 'bold',
-    },
-    searchContainer: {
-        padding: 15,
-        backgroundColor: '#ffffff',
-    },
-    searchBar: {
-        elevation: 0,
-        backgroundColor: '#f5f5f5',
-    },
-    rolesContainer: {
-        paddingHorizontal: 15,
-        paddingVertical: 10,
-        backgroundColor: '#ffffff',
-    },
-    roleChipFilter: {
-        marginRight: 8,
-    },
-    listContainer: {
-        padding: 15,
-    },
-    expertCard: {
-        marginBottom: 15,
-        elevation: 2,
-    },
-    expertHeader: {
-        flexDirection: 'row',
-        marginBottom: 15,
-    },
-    avatar: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        marginRight: 15,
-        backgroundColor: '#e0e0e0',
-    },
-    expertInfo: {
-        flex: 1,
-    },
-    expertName: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#333',
-        marginBottom: 5,
-    },
-    roleChip: {
-        alignSelf: 'flex-start',
-        marginBottom: 8,
-        backgroundColor: '#e3f2fd',
-    },
-    roleText: {
-        fontSize: 12,
-    },
-    bio: {
-        fontSize: 13,
-        color: '#666',
-        lineHeight: 18,
-    },
-    buttonRow: {
-        flexDirection: 'row',
-        gap: 10,
-    },
-    actionButton: {
-        flex: 1,
-    },
-    emptyContainer: {
-        padding: 40,
-        alignItems: 'center',
-    },
-    emptyText: {
-        fontSize: 16,
-        color: '#999',
-    },
-    expertInfo: { flex: 1 },
-    expertName: { fontSize: 18, fontWeight: "bold" },
-    roleChip: { alignSelf: "flex-start", marginTop: 5 },
-    roleChipFilter: { marginRight: 8 },
-    emptyContainer: { padding: 40, alignItems: "center" },
-    emptyText: { color: "#999" }
-});
 
 export default ExpertList;

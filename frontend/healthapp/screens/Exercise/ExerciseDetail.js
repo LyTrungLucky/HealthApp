@@ -1,11 +1,11 @@
-// screens/Exercise/ExerciseDetail.js
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Linking, Alert } from "react-native";
+import { View, Text, ScrollView, Image, TouchableOpacity, Linking, Alert } from "react-native";
 import { Button, ActivityIndicator, Chip, Portal, Dialog, RadioButton, TextInput } from "react-native-paper";
 import { useState, useEffect, useRef } from "react";
 import { Video } from 'expo-av';
 import { useNavigation, useRoute } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { authApis, endpoints, BASE_URL } from "../../utils/Apis";
+import styles from "../../styles/screens/Exercise/ExerciseDetailStyles";
 
 const ExerciseDetail = () => {
     const [exercise, setExercise] = useState(null);
@@ -26,7 +26,6 @@ const ExerciseDetail = () => {
     }, []);
 
     useEffect(() => {
-        // load user's workout plans for quick add
         loadPlans();
     }, []);
 
@@ -205,7 +204,6 @@ const ExerciseDetail = () => {
 
     return (
         <View style={styles.container}>
-            {/* Header with Back Button */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => nav.goBack()} style={styles.backButton}>
                     <Text style={styles.backIcon}>←</Text>
@@ -215,19 +213,16 @@ const ExerciseDetail = () => {
             </View>
 
             <ScrollView style={styles.content}>
-                {/* Image */}
                 <Image 
                     source={getImageUri() ? { uri: getImageUri() } : require('../../assets/icon.png')}
-                    style={styles.image}
+                    style={styles.exerciseImage}
                 />
 
-                {/* Title & Category */}
                 <View style={styles.titleSection}>
-                    <Text style={styles.title}>{exercise.name}</Text>
+                    <Text style={styles.exerciseTitle}>{exercise.name}</Text>
                     <Chip style={styles.categoryChip}>{exercise.category?.name || 'N/A'}</Chip>
                 </View>
 
-                {/* Stats */}
                 <View style={styles.statsContainer}>
                     <View style={styles.statBox}>
                         <Text style={styles.statIcon}>⏱️</Text>
@@ -247,19 +242,16 @@ const ExerciseDetail = () => {
                     </View>
                 </View>
 
-                {/* Description */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Mô tả</Text>
                     <Text style={styles.description}>{exercise.description}</Text>
                 </View>
 
-                {/* Instructions */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Hướng dẫn thực hiện</Text>
                     <Text style={styles.instructions}>{exercise.instructions}</Text>
                 </View>
 
-                {/* Video (inline) */}
                 {getVideoUrl() ? (
                     <View style={styles.videoContainer}>
                         <Video
@@ -279,7 +271,6 @@ const ExerciseDetail = () => {
                     </View>
                 )}
 
-                {/* Add to Plan Button */}
                 <Button 
                     mode="outlined" 
                     icon="calendar-plus"
@@ -317,159 +308,5 @@ const ExerciseDetail = () => {
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#f5f5f5',
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    errorContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
-    },
-    errorText: {
-        fontSize: 16,
-        color: '#666',
-        marginBottom: 20,
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: '#3b5998',
-        padding: 15,
-        paddingTop: 50,
-    },
-    backButton: {
-        padding: 5,
-    },
-    backIcon: {
-        fontSize: 28,
-        color: '#ffffff',
-        fontWeight: 'bold',
-    },
-    headerTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#ffffff',
-    },
-    placeholder: {
-        width: 38,
-    },
-    content: {
-        flex: 1,
-    },
-    image: {
-        width: '100%',
-        height: 250,
-        backgroundColor: '#e0e0e0',
-    },
-    titleSection: {
-        padding: 20,
-        backgroundColor: '#ffffff',
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#333',
-        marginBottom: 10,
-    },
-    categoryChip: {
-        alignSelf: 'flex-start',
-        backgroundColor: '#e3f2fd',
-    },
-    statsContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        padding: 20,
-        backgroundColor: '#ffffff',
-        marginTop: 10,
-    },
-    statBox: {
-        alignItems: 'center',
-    },
-    statIcon: {
-        fontSize: 32,
-        marginBottom: 5,
-    },
-    statValue: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#3b5998',
-        marginBottom: 2,
-    },
-    statLabel: {
-        fontSize: 12,
-        color: '#666',
-    },
-    difficultyBadge: {
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 20,
-        marginBottom: 5,
-    },
-    difficultyText: {
-        fontSize: 14,
-        color: '#ffffff',
-        fontWeight: 'bold',
-    },
-    section: {
-        backgroundColor: '#ffffff',
-        padding: 20,
-        marginTop: 10,
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#333',
-        marginBottom: 12,
-    },
-    description: {
-        fontSize: 15,
-        color: '#666',
-        lineHeight: 24,
-    },
-    instructions: {
-        fontSize: 15,
-        color: '#666',
-        lineHeight: 24,
-    },
-    videoButton: {
-        margin: 20,
-        marginBottom: 10,
-        backgroundColor: '#f44336',
-    },
-    noVideoText: {
-        fontSize: 14,
-        color: '#999',
-    },
-    videoContainer: {
-        backgroundColor: '#ffffff',
-        marginTop: 10,
-        padding: 10,
-    },
-    video: {
-        width: '100%',
-        height: 250,
-        backgroundColor: '#000'
-    },
-    openExternButton: {
-        marginTop: 10,
-        alignSelf: 'flex-end'
-    },
-    addButton: {
-        margin: 20,
-        marginTop: 0,
-        marginBottom: 30,
-        borderColor: '#3b5998',
-    },
-});
 
 export default ExerciseDetail;

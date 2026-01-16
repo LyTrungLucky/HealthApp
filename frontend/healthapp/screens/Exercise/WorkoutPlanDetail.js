@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Card, ActivityIndicator, Chip, Portal, Dialog, RadioButton, TextInput, Button } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authApis, endpoints } from '../../utils/Apis';
 import { useRoute } from '@react-navigation/native';
+import styles from '../../styles/screens/Exercise/WorkoutPlanDetailStyles';
 
 const weekdayNames = ['Thứ 2','Thứ 3','Thứ 4','Thứ 5','Thứ 6','Thứ 7','Chủ nhật'];
 
@@ -175,30 +176,5 @@ const WorkoutPlanDetail = () => {
         </ScrollView>
     );
 };
-
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f5f5f5' },
-    center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    header: { backgroundColor: '#fff', padding: 16, borderBottomWidth: 1, borderColor: '#eee' },
-    title: { fontSize: 20, fontWeight: 'bold', marginBottom: 8 },
-    goalChip: { alignSelf: 'flex-start', marginBottom: 8, backgroundColor: '#2196f3', color: '#fff' },
-    metaText: { color: '#666' },
-    createdBy: { color: '#999', marginTop: 6, fontStyle: 'italic' },
-    section: { padding: 16 },
-    sectionTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 8 },
-    sectionContent: { color: '#444', lineHeight: 20 },
-    scheduleCard: { marginBottom: 12 },
-    scheduleHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-    exerciseName: { fontSize: 15, fontWeight: '600' },
-    weekdayChip: { height: 28 },
-    meta: { color: '#666' },
-    notes: { marginTop: 6, color: '#444' },
-    weekdayHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 8, backgroundColor: '#ffffff', borderRadius: 8, marginBottom: 8 },
-    weekdayTitle: { fontSize: 16, fontWeight: '700' },
-    countBadge: { backgroundColor: '#2196f3', borderRadius: 12, paddingHorizontal: 8, paddingVertical: 4 },
-    countText: { color: '#fff', fontWeight: '700' },
-    dayItems: { marginBottom: 12 },
-    dayBlock: { marginBottom: 12 },
-});
 
 export default WorkoutPlanDetail;
